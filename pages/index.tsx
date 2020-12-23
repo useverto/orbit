@@ -114,7 +114,8 @@ export default function Index() {
     const apiEndpoint = await arweaveClient.transactions.getData(genesisTX, { decode: true, string: true });
     // @ts-expect-error
     JSON.parse(apiEndpoint);
-    const pong = await fetch(`https://${apiEndpoint}/ping`);
+    // @ts-expect-error
+    const pong = await fetch(`https://${apiEndpoint.publicURL}/ping`);
     // TODO: @t8 Check for response before parsing
 
     const uptime = (await pong.json()).uptime;
