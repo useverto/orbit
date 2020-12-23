@@ -56,15 +56,6 @@ const Post = () => {
       `,
         { addr: router.query.addr }
       ).then(async (txs) => {
-        const res: {
-          id;
-          hasMined: boolean;
-          unix?: number;
-          timestamp?: string;
-          type: string;
-          status: string;
-        }[] = [];
-
         for (const tx of txs) {
           const type = tx.node.tags.find((tag) => tag.name === "Type").value;
 
@@ -165,37 +156,39 @@ const Post = () => {
             status = "cancelled";
           }
 
-          res.push({
-            id: (
-              <Text>
-                <Dot
-                  type={
-                    status === "pending"
-                      ? "warning"
-                      : status === "completed"
-                      ? "success"
-                      : "error"
-                  }
-                />{" "}
-                {tx.node.id}
-              </Text>
-            ),
-            hasMined: tx.node.block ? true : false,
-            unix: tx.node.block
-              ? tx.node.block.timestamp
-              : parseInt(new Date().getTime().toString().slice(0, -3)),
-            timestamp: tx.node.block
-              ? moment
-                  .unix(tx.node.block.timestamp)
-                  .format("YYYY-MM-DD HH:mm:ss")
-              : "mining ...",
-            type: tx.node.tags.find((tag) => tag.name === "Type").value,
-            status,
+          setTrades((trades) => {
+            return [
+              ...trades,
+              {
+                id: (
+                  <Text>
+                    <Dot
+                      type={
+                        status === "pending"
+                          ? "warning"
+                          : status === "completed"
+                          ? "success"
+                          : "error"
+                      }
+                    />{" "}
+                    {tx.node.id}
+                  </Text>
+                ),
+                hasMined: tx.node.block ? true : false,
+                unix: tx.node.block
+                  ? tx.node.block.timestamp
+                  : parseInt(new Date().getTime().toString().slice(0, -3)),
+                timestamp: tx.node.block
+                  ? moment
+                      .unix(tx.node.block.timestamp)
+                      .format("YYYY-MM-DD HH:mm:ss")
+                  : "mining ...",
+                type: tx.node.tags.find((tag) => tag.name === "Type").value,
+                status,
+              },
+            ];
           });
         }
-
-        console.log(res);
-        setTrades(res);
       });
     }
   }, [router.query.addr]);
