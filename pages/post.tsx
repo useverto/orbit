@@ -138,6 +138,33 @@ const Post = () => {
             }
           }
 
+          const cancelTx = (
+            await run(
+              `
+              query($txID: [String!]!) {
+                transactions(
+                  tags: [
+                    { name: "Exchange", values: "Verto" }
+                    { name: "Type", values: "Cancel" }
+                    { name: "Order", values: $txID }
+                  ]
+                ) {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+              }
+            `,
+              { txID: tx.node.id }
+            )
+          ).data.transactions.edges[0];
+
+          if (cancelTx) {
+            status = "cancelled";
+          }
+
           res.push({
             id: (
               <Text>
