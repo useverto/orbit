@@ -5,7 +5,9 @@ import Arweave from "arweave";
 import {
   Table,
   Tag,
-  Loading
+  Loading,
+  Dot,
+  Tooltip
 } from "@geist-ui/react";
 
 import { query } from "../utils/gql";
@@ -34,24 +36,28 @@ export default function Index() {
     let response = [];
 
     for (let i = 0; i < allTPs.length; i++) {
-      const balance = await arweaveClient.wallets.getBalance(allTPs[i].wallet);
-      arweaveClient.ar.winstonToAr(balance);
+      const balance = `${arweaveClient.ar.winstonToAr(await arweaveClient.wallets.getBalance(allTPs[i].wallet))} AR`;
 
       const pong: number | boolean = await ping(allTPs[i].genesis);
       let status;
       if (typeof (pong) === "number") {
         // It is online
-        status = <Tag type="success">{pong}</Tag>
+        let pongText = `${pong / 3600} hours`;
+        status = (
+          <Tooltip text={pongText} placement="topStart">
+            <Dot style={{ marginRight: '20px' }} type="success">Online</Dot>
+          </Tooltip>
+        )
       } else {
         // It is offline
-        status = <Tag type="error">Offline</Tag>;
+        status = <Dot style={{ marginRight: '20px' }} type="error">Offline</Dot>;
       }
 
       response.push({
         status,
         address: allTPs[i].wallet,
         balance,
-        stake: allTPs[i].stake
+        stake: `${allTPs[i].stake} VRT`
       });
     }
     return response;
