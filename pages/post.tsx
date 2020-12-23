@@ -1,7 +1,8 @@
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import { Loading, Page, Breadcrumbs, Table } from "@geist-ui/react";
-import { all } from "ar-gql";
+import { Loading, Text, Dot, Page, Breadcrumbs, Table } from "@geist-ui/react";
+import { all, run } from "ar-gql";
+import moment from "moment";
 
 const Post = () => {
   const router = useRouter();
@@ -54,25 +55,119 @@ const Post = () => {
         }
       `,
         { addr: router.query.addr }
-      ).then((txs) => {
+      ).then(async (txs) => {
         const res: {
-          id: string;
+          id;
           hasMined: boolean;
-          timestamp?: number;
+          unix?: number;
+          timestamp?: string;
           type: string;
+          status: string;
         }[] = [];
 
         for (const tx of txs) {
+          const type = tx.node.tags.find((tag) => tag.name === "Type").value;
+
+          let status = "pending";
+          if (type === "Buy" || type === "Sell") {
+            const confirmationTx = (
+              await run(
+                `
+                query($txID: [String!]!) {
+                  transactions(
+                    tags: [
+                      { name: "Exchange", values: "Verto" }
+                      { name: "Type", values: "Confirmation" }
+                      { name: "Match", values: $txID }
+                    ]
+                  ) {
+                    edges {
+                      node {
+                        block {
+                          timestamp
+                        }
+                        tags {
+                          name
+                          value
+                        }
+                      }
+                    }
+                  }
+                }
+              `,
+                { txID: tx.node.id }
+              )
+            ).data.transactions.edges[0];
+
+            if (confirmationTx) {
+              status = "completed";
+            }
+          }
+          if (type === "Swap") {
+            const confirmationTx = (
+              await run(
+                `
+                query($txID: [String!]!) {
+                  transactions(
+                    tags: [
+                      { name: "Exchange", values: "Verto" }
+                      { name: "Type", values: "Confirmation" }
+                      { name: "Swap", values: $txID }
+                    ]
+                  ) {
+                    edges {
+                      node {
+                        block {
+                          timestamp
+                        }
+                        tags {
+                          name
+                          value
+                        }
+                      }
+                    }
+                  }
+                }
+              `,
+                { txID: tx.node.id }
+              )
+            ).data.transactions.edges[0];
+
+            if (confirmationTx) {
+              status = "completed";
+            }
+          }
+
           res.push({
-            id: tx.node.id,
+            id: (
+              <Text>
+                <Dot
+                  type={
+                    status === "pending"
+                      ? "warning"
+                      : status === "completed"
+                      ? "success"
+                      : "error"
+                  }
+                />{" "}
+                {tx.node.id}
+              </Text>
+            ),
             hasMined: tx.node.block ? true : false,
-            timestamp: tx.node.block
+            unix: tx.node.block
               ? tx.node.block.timestamp
               : parseInt(new Date().getTime().toString().slice(0, -3)),
+            timestamp: tx.node.block
+              ? moment
+                  .unix(tx.node.block.timestamp)
+                  .format("YYYY-MM-DD HH:mm:ss")
+              : "mining ...",
             type: tx.node.tags.find((tag) => tag.name === "Type").value,
+            status,
           });
         }
 
+        console.log(res);
         setTrades(res);
       });
     }
@@ -89,13 +184,13 @@ const Post = () => {
       {trades.length === 0 ? (
         <Table data={loadingTradesData}>
           <Table.Column prop="id" label="Order ID" />
-          <Table.Column prop="timestamp" label="UNIX Timestamp" />
+          <Table.Column prop="timestamp" label="Timestamp" />
           <Table.Column prop="type" label="Order Type" />
         </Table>
       ) : (
         <Table data={trades}>
           <Table.Column prop="id" label="Order ID" />
-          <Table.Column prop="timestamp" label="UNIX Timestamp" />
+          <Table.Column prop="timestamp" label="Timestamp" />
           <Table.Column prop="type" label="Order Type" />
         </Table>
       )}
