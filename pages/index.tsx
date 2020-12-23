@@ -22,51 +22,40 @@ export default function Index() {
   });
   const client = new Verto(arweaveClient);
 
-  let data = [
-    { status: <Loading></Loading>, address: <Loading></Loading>, balance: <Loading></Loading>, reputation: <Loading></Loading> },
-  ];
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    populateTradingPosts().then(res => {
+      setData(res);
+    });
+  }, []);
 
-  const TradingPostTable: React.FC = props => {
-    useEffect(() => {
-      async function populateTradingPosts() {
-        const allTPs: [{ wallet: string, stake: number, genesis: string }] = await getTradingPosts();
-        let response;
+  async function populateTradingPosts() {
+    const allTPs: [{ wallet: string, stake: number, genesis: string }] = await getTradingPosts();
+    let response = [];
 
-        for (let i = 0; i < allTPs.length; i++) {
-          const balance = await arweaveClient.wallets.getBalance(allTPs[i].wallet);
-          arweaveClient.ar.winstonToAr(balance);
+    for (let i = 0; i < allTPs.length; i++) {
+      const balance = await arweaveClient.wallets.getBalance(allTPs[i].wallet);
+      arweaveClient.ar.winstonToAr(balance);
 
-          const pong: string | boolean = await ping(allTPs[i].genesis);
-          let status;
-          if (typeof (pong) === "string") {
-            // It is online
-            status = <Tag type="success">{pong}</Tag>
-          } else {
-            // It is offline
-            status = <Tag type="error">Offline</Tag>;
-          }
-
-          response.push({
-            status,
-            address: allTPs[i].wallet,
-            balance,
-            stake: allTPs[i].stake
-          });
-        }
-        return (
-          <Table data={response}>
-            <Table.Column prop="status" label="status" />
-            <Table.Column prop="address" label="address" />
-            <Table.Column prop="balance" label="balance" />
-            <Table.Column prop="stake" label="stake" />
-          </Table>
-        );
+      const pong: number | boolean = await ping(allTPs[i].genesis);
+      let status;
+      if (typeof (pong) === "number") {
+        // It is online
+        status = <Tag type="success">{pong}</Tag>
+      } else {
+        // It is offline
+        status = <Tag type="error">Offline</Tag>;
       }
 
-      populateTradingPosts();
-    }, []);
-    return <div></div>;
-  };
+      response.push({
+        status,
+        address: allTPs[i].wallet,
+        balance,
+        stake: allTPs[i].stake
+      });
+    }
+    return response;
+  }
 
   async function getTradingPosts(): Promise<[{ wallet: string, stake: number, genesis: string }]> {
     const genesi = (await query<EdgeQueryResponse>({
@@ -110,15 +99,12 @@ export default function Index() {
     return posts;
   }
 
-  async function ping(genesisTX: string): Promise<string | boolean> {
-    const apiEndpoint = await arweaveClient.transactions.getData(genesisTX, { decode: true, string: true });
+  async function ping(genesisTX: string): Promise<number | boolean> {
     // @ts-expect-error
-    JSON.parse(apiEndpoint);
-    // @ts-expect-error
+    const apiEndpoint = JSON.parse(await arweaveClient.transactions.getData(genesisTX, { decode: true, string: true }));
     const pong = await fetch(`https://${apiEndpoint.publicURL}/ping`);
     // TODO: @t8 Check for response before parsing
-
-    const uptime = (await pong.json()).uptime;
+    const uptime = (await pong.clone().json()).uptime;
     return uptime;
   }
 
@@ -133,7 +119,16 @@ export default function Index() {
           <h1 className={styles.title}>🌍rbit</h1>
           <h4>A block explorer for the Verto Protocol</h4>
         </div>
-        <TradingPostTable></TradingPostTable>
+        {data.length === 0 ? (
+          <Loading></Loading>
+        ) : (
+          <Table data={data}>
+            <Table.Column prop="status" label="status" />
+            <Table.Column prop="address" label="address" />
+            <Table.Column prop="balance" label="balance" />
+            <Table.Column prop="stake" label="stake" />
+          </Table>
+        )}
       </div>
     </>
   )
