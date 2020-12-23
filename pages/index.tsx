@@ -32,6 +32,8 @@ export default function Index() {
     let response = [];
 
     for (let i = 0; i < allTPs.length; i++) {
+      const address = <a href={`/post?addr=${allTPs[i].wallet}`}>{allTPs[i].wallet}</a>
+
       const balance = `${arweaveClient.ar.winstonToAr(
         await arweaveClient.wallets.getBalance(allTPs[i].wallet)
       )} AR`;
@@ -59,7 +61,7 @@ export default function Index() {
 
       response.push({
         status,
-        address: allTPs[i].wallet,
+        address,
         balance,
         stake: `${allTPs[i].stake} VRT`,
       });
