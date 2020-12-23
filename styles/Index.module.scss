@@ -1,12 +1,13 @@
 .container {
   min-height: 100vh;
-  padding: 0 0.5rem;
+  padding: 1em 2em;
   display: flex;
   flex-direction: column;
 }
 
 .heading {
   text-align: center;
+  margin-bottom: 1em;
 
   .title {
     margin-bottom: 0;

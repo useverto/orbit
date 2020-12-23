@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Head from "next/head";
 import Verto from "@verto/lib";
 import Arweave from "arweave";
-import { Table, Tag, Loading, Dot, Tooltip } from "@geist-ui/react";
+import { Table, Loading, Dot, Tooltip } from "@geist-ui/react";
 
 import { query } from "../utils/gql";
 import styles from "../styles/Index.module.scss";
@@ -18,6 +18,12 @@ export default function Index() {
   });
   const client = new Verto(arweaveClient);
 
+  const loadingTableData = [{
+    status: <Loading></Loading>,
+    address: <Loading></Loading>,
+    balance: <Loading></Loading>,
+    stake: <Loading></Loading>
+  }];
   const [data, setData] = useState([]);
   useEffect(() => {
     populateTradingPosts().then((res) => {
@@ -115,8 +121,8 @@ export default function Index() {
   }
 
   async function ping(genesisTX: string): Promise<number | boolean> {
-    // @ts-expect-error
     const apiEndpoint = JSON.parse(
+      // @ts-expect-error
       await arweaveClient.transactions.getData(genesisTX, {
         decode: true,
         string: true,
@@ -137,14 +143,19 @@ export default function Index() {
       <div className={styles.container}>
         <div className={styles.heading}>
           <h1 className={styles.title}>🌍rbit</h1>
-          <h4>A block explorer for the Verto Protocol</h4>
+          <h4>Verto Protocol Explorer</h4>
         </div>
         {data.length === 0 ? (
-          <Loading></Loading>
+          <Table data={loadingTableData}>
+            <Table.Column prop="status" label="status" />
+            <Table.Column prop="address" label="trading post address" />
+            <Table.Column prop="balance" label="balance" />
+            <Table.Column prop="stake" label="stake" />
+          </Table>
         ) : (
           <Table data={data}>
             <Table.Column prop="status" label="status" />
-            <Table.Column prop="address" label="address" />
+            <Table.Column prop="address" label="trading post address" />
             <Table.Column prop="balance" label="balance" />
             <Table.Column prop="stake" label="stake" />
           </Table>
