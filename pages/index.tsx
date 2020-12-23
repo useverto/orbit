@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
-import Head from 'next/head';
+import Head from "next/head";
 import Verto from "@verto/lib";
 import Arweave from "arweave";
-import {
-  Table,
-  Tag,
-  Loading,
-  Dot,
-  Tooltip
-} from "@geist-ui/react";
+import { Table, Tag, Loading, Dot, Tooltip } from "@geist-ui/react";
 
 import { query } from "../utils/gql";
 import styles from "../styles/Index.module.scss";
@@ -16,9 +10,9 @@ import { EdgeQueryResponse } from "../types";
 
 export default function Index() {
   const arweaveClient = Arweave.init({
-    host: 'arweave.net',
+    host: "arweave.net",
     port: 443,
-    protocol: 'https',
+    protocol: "https",
     timeout: 20000,
     logging: false,
   });
@@ -26,47 +20,59 @@ export default function Index() {
 
   const [data, setData] = useState([]);
   useEffect(() => {
-    populateTradingPosts().then(res => {
+    populateTradingPosts().then((res) => {
       setData(res);
     });
   }, []);
 
   async function populateTradingPosts() {
-    const allTPs: [{ wallet: string, stake: number, genesis: string }] = await getTradingPosts();
+    const allTPs: [
+      { wallet: string; stake: number; genesis: string }
+    ] = await getTradingPosts();
     let response = [];
 
     for (let i = 0; i < allTPs.length; i++) {
-      const balance = `${arweaveClient.ar.winstonToAr(await arweaveClient.wallets.getBalance(allTPs[i].wallet))} AR`;
+      const balance = `${arweaveClient.ar.winstonToAr(
+        await arweaveClient.wallets.getBalance(allTPs[i].wallet)
+      )} AR`;
 
       const pong: number | boolean = await ping(allTPs[i].genesis);
       let status;
-      if (typeof (pong) === "number") {
+      if (typeof pong === "number") {
         // It is online
         let pongText = `${pong / 3600} hours`;
         status = (
           <Tooltip text={pongText} placement="topStart">
-            <Dot style={{ marginRight: '20px' }} type="success">Online</Dot>
+            <Dot style={{ marginRight: "20px" }} type="success">
+              Online
+            </Dot>
           </Tooltip>
-        )
+        );
       } else {
         // It is offline
-        status = <Dot style={{ marginRight: '20px' }} type="error">Offline</Dot>;
+        status = (
+          <Dot style={{ marginRight: "20px" }} type="error">
+            Offline
+          </Dot>
+        );
       }
 
       response.push({
         status,
         address: allTPs[i].wallet,
         balance,
-        stake: `${allTPs[i].stake} VRT`
+        stake: `${allTPs[i].stake} VRT`,
       });
     }
     return response;
   }
 
-  async function getTradingPosts(): Promise<[{ wallet: string, stake: number, genesis: string }]> {
-    const genesi = (await query<EdgeQueryResponse>({
-      query: 
-      `{
+  async function getTradingPosts(): Promise<
+    [{ wallet: string; stake: number; genesis: string }]
+  > {
+    const genesi = (
+      await query<EdgeQueryResponse>({
+        query: `{
         transactions(
           tags: [
             { name: "Exchange", values: "Verto" }
@@ -84,9 +90,10 @@ export default function Index() {
           }
         }
       }`,
-    })).data.transactions;
+      })
+    ).data.transactions;
     const gensisTxs = genesi.edges;
-    let posts: [{ wallet: string, stake: number, genesis: string }] = [];
+    let posts: [{ wallet: string; stake: number; genesis: string }] = [];
     const encountered: string[] = [];
 
     for (const tx of gensisTxs) {
@@ -96,7 +103,7 @@ export default function Index() {
           posts.push({
             wallet: tx.node.owner.address,
             stake: stake,
-            genesis: tx.node.id
+            genesis: tx.node.id,
           });
         }
         encountered.push(tx.node.owner.address);
@@ -107,7 +114,12 @@ export default function Index() {
 
   async function ping(genesisTX: string): Promise<number | boolean> {
     // @ts-expect-error
-    const apiEndpoint = JSON.parse(await arweaveClient.transactions.getData(genesisTX, { decode: true, string: true }));
+    const apiEndpoint = JSON.parse(
+      await arweaveClient.transactions.getData(genesisTX, {
+        decode: true,
+        string: true,
+      })
+    );
     const pong = await fetch(`https://${apiEndpoint.publicURL}/ping`);
     // TODO: @t8 Check for response before parsing
     const uptime = (await pong.clone().json()).uptime;
@@ -137,5 +149,5 @@ export default function Index() {
         )}
       </div>
     </>
-  )
+  );
 }

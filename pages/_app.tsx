@@ -1,4 +1,4 @@
-import '../styles/globals.css';
+import "../styles/globals.css";
 import { GeistProvider, CssBaseline } from "@geist-ui/react";
 
 function MyApp({ Component, pageProps }) {
@@ -34,7 +34,7 @@ function MyApp({ Component, pageProps }) {
       <CssBaseline />
       <Component {...pageProps} />
     </GeistProvider>
-  )
+  );
 }
 
-export default MyApp
+export default MyApp;
