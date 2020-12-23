@@ -101,6 +101,7 @@ export default function Index() {
       })
     ).data.transactions;
     const gensisTxs = genesi.edges;
+    // @ts-expect-error
     let posts: [{ wallet: string; stake: number; genesis: string }] = [];
     const encountered: string[] = [];
 
