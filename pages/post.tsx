@@ -1,19 +1,27 @@
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import { Page, Breadcrumbs } from "@geist-ui/react";
+import { Loading, Page, Breadcrumbs, Table } from "@geist-ui/react";
 import { all } from "ar-gql";
-import { parse } from "path";
 
 const Post = () => {
   const router = useRouter();
   const [addr, setAddr] = useState("");
 
   const [trades, setTrades] = useState([]);
+  const loadingTradesData = [
+    {
+      id: <Loading />,
+      hasMined: <Loading />,
+      timestamp: <Loading />,
+      type: <Loading />,
+    },
+  ];
   useEffect(() => {
-    // @ts-ignore
-    setAddr(router.query.addr);
-    all(
-      `
+    if (router.query.addr) {
+      // @ts-ignore
+      setAddr(router.query.addr);
+      all(
+        `
         query($addr: String!, $cursor: String) {
           transactions(
             recipients: [$addr]
@@ -45,29 +53,30 @@ const Post = () => {
           }
         }
       `,
-      { addr: router.query.addr }
-    ).then((txs) => {
-      const res: {
-        id: string;
-        hasMined: boolean;
-        timestamp?: number;
-        type: string;
-      }[] = [];
+        { addr: router.query.addr }
+      ).then((txs) => {
+        const res: {
+          id: string;
+          hasMined: boolean;
+          timestamp?: number;
+          type: string;
+        }[] = [];
 
-      for (const tx of txs) {
-        res.push({
-          id: tx.node.id,
-          hasMined: tx.node.block ? true : false,
-          timestamp: tx.node.block
-            ? tx.node.block.timestamp
-            : parseInt(new Date().getTime().toString().slice(0, -3)),
-          type: tx.node.tags.find((tag) => tag.name === "Type").value,
-        });
-      }
+        for (const tx of txs) {
+          res.push({
+            id: tx.node.id,
+            hasMined: tx.node.block ? true : false,
+            timestamp: tx.node.block
+              ? tx.node.block.timestamp
+              : parseInt(new Date().getTime().toString().slice(0, -3)),
+            type: tx.node.tags.find((tag) => tag.name === "Type").value,
+          });
+        }
 
-      console.log(res);
-    });
-  }, []);
+        setTrades(res);
+      });
+    }
+  }, [router.query.addr]);
 
   return (
     <Page>
@@ -76,6 +85,20 @@ const Post = () => {
         <Breadcrumbs.Item href="/">Trading Posts</Breadcrumbs.Item>
         <Breadcrumbs.Item>{addr}</Breadcrumbs.Item>
       </Breadcrumbs>
+
+      {trades.length === 0 ? (
+        <Table data={loadingTradesData}>
+          <Table.Column prop="id" label="Order ID" />
+          <Table.Column prop="timestamp" label="UNIX Timestamp" />
+          <Table.Column prop="type" label="Order Type" />
+        </Table>
+      ) : (
+        <Table data={trades}>
+          <Table.Column prop="id" label="Order ID" />
+          <Table.Column prop="timestamp" label="UNIX Timestamp" />
+          <Table.Column prop="type" label="Order Type" />
+        </Table>
+      )}
     </Page>
   );
 };

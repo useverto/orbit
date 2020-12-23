@@ -18,12 +18,14 @@ export default function Index() {
   });
   const client = new Verto(arweaveClient);
 
-  const loadingTableData = [{
-    status: <Loading></Loading>,
-    address: <Loading></Loading>,
-    balance: <Loading></Loading>,
-    stake: <Loading></Loading>
-  }];
+  const loadingTableData = [
+    {
+      status: <Loading></Loading>,
+      address: <Loading></Loading>,
+      balance: <Loading></Loading>,
+      stake: <Loading></Loading>,
+    },
+  ];
   const [data, setData] = useState([]);
   useEffect(() => {
     populateTradingPosts().then((res) => {
@@ -38,7 +40,9 @@ export default function Index() {
     let response = [];
 
     for (let i = 0; i < allTPs.length; i++) {
-      const address = <a href={`/post?addr=${allTPs[i].wallet}`}>{allTPs[i].wallet}</a>
+      const address = (
+        <a href={`/post?addr=${allTPs[i].wallet}`}>{allTPs[i].wallet}</a>
+      );
 
       const balance = `${arweaveClient.ar.winstonToAr(
         await arweaveClient.wallets.getBalance(allTPs[i].wallet)
