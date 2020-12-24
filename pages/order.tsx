@@ -232,7 +232,9 @@ const Order = () => {
 
         <Spacer y={1} />
 
+        {/* @ts-expect-error */}
         <Dot type={status.type}>
+          {/* @ts-expect-error */}
           <Tag type={status.type}>{status.title}</Tag>
         </Dot>
 
