@@ -210,7 +210,9 @@ const Post = () => {
                           : "error"
                       }
                     />{" "}
-                    <a href={`/order?id=${tx.node.id}`}>{tx.node.id}</a>
+                    <a target="_blank" href={`/order?id=${tx.node.id}`}>
+                      {tx.node.id}
+                    </a>
                   </Text>
                 ),
                 hasMined: tx.node.block ? true : false,

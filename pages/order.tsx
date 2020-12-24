@@ -2,7 +2,16 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { tx, run } from "ar-gql";
 import Head from "next/head";
-import { Page, Breadcrumbs, Spacer, Card, Description } from "@geist-ui/react";
+import {
+  Page,
+  Breadcrumbs,
+  Spacer,
+  Dot,
+  Tag,
+  Text,
+  Card,
+  Description,
+} from "@geist-ui/react";
 import { GQLNodeInterface } from "ar-gql/dist/types";
 import Arweave from "arweave";
 
@@ -35,9 +44,14 @@ const getPSTAmount = async (tx: GQLNodeInterface) => {
 const Order = () => {
   const router = useRouter();
   const [id, setID] = useState("");
+  const [owner, setOwner] = useState("");
   const [post, setPost] = useState("");
   const [type, setType] = useState("");
   const [value, setValue] = useState("");
+  const [status, setStatus] = useState({
+    type: "warning",
+    title: "pending",
+  });
 
   const [orders, setOrders] = useState([]);
 
@@ -48,6 +62,7 @@ const Order = () => {
 
       // @ts-ignore
       tx(router.query.id).then(async (tx) => {
+        setOwner(tx.owner.address);
         setPost(tx.recipient);
 
         const type = tx.tags.find((tag) => tag.name === "Type").value;
@@ -58,6 +73,13 @@ const Order = () => {
         }
         if (type === "Sell") {
           setValue(await getPSTAmount(tx));
+        }
+        if (type === "Swap") {
+          setValue(
+            `${tx.tags.find((tag) => tag.name === "Value").value} ${
+              tx.tags.find((tag) => tag.name === "Chain").value
+            }`
+          );
         }
 
         if (type === "Buy") {
@@ -71,7 +93,6 @@ const Order = () => {
                   { name: "Type", values: "PST-Transfer" }
                   { name: "Order", values: $order }
                 ]
-                first: 1
               ) {
                 edges {
                   node {
@@ -88,15 +109,13 @@ const Order = () => {
             { post: tx.recipient, order: router.query.id }
           );
 
-          if (res.data.transactions.edges[0]) {
-            const amnt = await getPSTAmount(
-              res.data.transactions.edges[0].node
-            );
+          for (const tx of res.data.transactions.edges) {
+            const amnt = await getPSTAmount(tx.node);
             setOrders((orders) => {
               return [
                 ...orders,
                 {
-                  title: res.data.transactions.edges[0].node.id,
+                  title: tx.node.id,
                   description: `PST Transfer - ${amnt}`,
                 },
               ];
@@ -104,7 +123,43 @@ const Order = () => {
           }
         }
         if (type === "Sell") {
-          // TODO(@johnletey): Query for an AR transfer
+          const res = await run(
+            `
+            query($post: String!, $order: [String!]!) {
+              transactions(
+                owners: [$post]
+                tags: [
+                  { name: "Exchange", values: "Verto" }
+                  { name: "Type", values: "AR-Transfer" }
+                  { name: "Order", values: $order }
+                ]
+              ) {
+                edges {
+                  node {
+                    id
+                    quantity {
+                      ar
+                    }
+                  }
+                }
+              }
+            }
+            `,
+            { post: tx.recipient, order: router.query.id }
+          );
+
+          for (const tx of res.data.transactions.edges) {
+            const amnt = await getARAmount(tx.node);
+            setOrders((orders) => {
+              return [
+                ...orders,
+                {
+                  title: tx.node.id,
+                  description: `AR Transfer - ${amnt}`,
+                },
+              ];
+            });
+          }
         }
 
         if (type === "Buy" || type === "Sell") {
@@ -144,9 +199,13 @@ const Order = () => {
                 ...orders,
                 {
                   title: res.data.transactions.edges[0].node.id,
-                  description: `Confirmation`,
+                  description: `Confirmation - ${received}`,
                 },
               ];
+            });
+            setStatus({
+              type: "success",
+              title: "completed",
             });
           }
         }
@@ -173,8 +232,24 @@ const Order = () => {
 
         <Spacer y={1} />
 
+        <Dot type={status.type}>
+          <Tag type={status.type}>{status.title}</Tag>
+        </Dot>
+
+        <Text>
+          Owner:{" "}
+          <a
+            target="_blank"
+            href={`https://viewblock.io/arweave/address/${owner}`}
+          >
+            {owner}
+          </a>
+        </Text>
+
+        <Spacer y={2} />
+
         <a target="_blank" href={`https://viewblock.io/arweave/tx/${id}`}>
-          <Card width="50%">
+          <Card width="50%" style={{ border: "1px dashed #333" }}>
             <Description title={id} content={`${type} - ${value}`} />
           </Card>
         </a>
@@ -185,7 +260,7 @@ const Order = () => {
               target="_blank"
               href={`https://viewblock.io/arweave/tx/${order.title}`}
             >
-              <Card width="50%">
+              <Card width="50%" style={{ border: "1px dashed #333" }}>
                 <Description title={order.title} content={order.description} />
               </Card>
             </a>
