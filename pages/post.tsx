@@ -209,7 +209,7 @@ const Post = () => {
                           ? "warning"
                           : status === "completed"
                           ? "success"
-                          : "error"
+                          : "secondary"
                       }
                     />{" "}
                     <a target="_blank" href={`/order?id=${tx.node.id}`}>
@@ -239,7 +239,7 @@ const Post = () => {
   useEffect(() => {
     const labels = [],
       data = [];
-    const errored = [],
+    const cancelled = [],
       pending = [],
       succeeded = [];
     for (let i = trades.length - 1; i >= 0; i--) {
@@ -252,17 +252,17 @@ const Post = () => {
         if (trades[i].status === "completed") {
           succeeded.push(1);
           pending.push(0);
-          errored.push(0);
+          cancelled.push(0);
         }
         if (trades[i].status === "pending") {
           succeeded.push(0);
           pending.push(1);
-          errored.push(0);
+          cancelled.push(0);
         }
         if (trades[i].status === "cancelled") {
           succeeded.push(0);
           pending.push(0);
-          errored.push(1);
+          cancelled.push(1);
         }
       } else {
         // Time already exists
@@ -274,7 +274,7 @@ const Post = () => {
           pending[position]++;
         }
         if (trades[i].status === "cancelled") {
-          errored[position]++;
+          cancelled[position]++;
         }
       }
     }
@@ -297,11 +297,11 @@ const Post = () => {
           data: pending,
         },
         {
-          label: "Errored",
-          backgroundColor: "rgba(255, 55, 93, 0.5)",
-          borderColor: "#FF375D",
+          label: "Cancelled",
+          backgroundColor: "rgba(130, 130, 130, 0.5)",
+          borderColor: "#828282",
           borderWidth: 0.5,
-          data: errored,
+          data: cancelled,
         },
       ],
     };
@@ -314,7 +314,10 @@ const Post = () => {
     <>
       <Head>
         <title>Orbit / Post</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>" />
+        <link
+          rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>"
+        />
       </Head>
       <Page>
         <Breadcrumbs size="large">
