@@ -21,6 +21,9 @@ function MyApp({ Component, pageProps }) {
           code: "#93C2DB",
           border: "#333",
           link: "#93C2DB",
+          success: "#00D46E",
+          warning: "#FFD336",
+          error: "#FF375D",
         },
         expressiveness: {
           dropdownBoxShadow: "0 0 0 1px #333",

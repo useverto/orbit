@@ -1,7 +1,15 @@
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { useState, useEffect } from "react";
-import { Loading, Text, Dot, Page, Breadcrumbs, Table, Spacer } from "@geist-ui/react";
+import {
+  Loading,
+  Text,
+  Dot,
+  Page,
+  Breadcrumbs,
+  Table,
+  Spacer,
+} from "@geist-ui/react";
 import { all, run } from "ar-gql";
 import moment from "moment";
 import { Bar } from "react-chartjs-2";
@@ -202,7 +210,7 @@ const Post = () => {
                           : "error"
                       }
                     />{" "}
-                    {tx.node.id}
+                    <a href={`/order?id=${tx.node.id}`}>{tx.node.id}</a>
                   </Text>
                 ),
                 hasMined: tx.node.block ? true : false,
