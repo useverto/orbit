@@ -162,6 +162,44 @@ const Order = () => {
           }
         }
 
+        const res = await run(
+          `
+          query($post: String!, $order: [String!]!) {
+            transactions(
+              recipients: [$post]
+              tags: [
+                { name: "Exchange", values: "Verto" }
+                { name: "Type", values: "Cancel" }
+                { name: "Order", values: $order }
+              ]
+              first: 1
+            ) {
+              edges {
+                node {
+                  id
+                }
+              }
+            }
+          }
+          `,
+          { post: tx.recipient, order: router.query.id }
+        );
+        if (res.data.transactions.edges[0]) {
+          setOrders((orders) => {
+            return [
+              ...orders,
+              {
+                title: res.data.transactions.edges[0].node.id,
+                description: `Cancel`,
+              },
+            ];
+          });
+          setStatus({
+            type: "error",
+            title: "cancelled",
+          });
+        }
+
         if (type === "Buy" || type === "Sell") {
           const res = await run(
             `
