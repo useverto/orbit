@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Loading, Text, Dot, Page, Breadcrumbs, Table } from "@geist-ui/react";
 import { all, run } from "ar-gql";
 import moment from "moment";
+import { Bar } from 'react-chartjs-2';
 import styles from "../styles/Post.module.scss";
 
 const Post = () => {
@@ -11,6 +12,29 @@ const Post = () => {
   const [addr, setAddr] = useState("");
 
   const [trades, setTrades] = useState([]);
+  const [graphData, setGraphData] = useState([]);
+  const graphOptions = {
+    tooltips: {
+      mode: 'index',
+      intersect: false
+    },
+    hover: {
+      mode: 'nearest',
+      intersect: true
+    },
+    scales: {
+      xAxes: [{
+        display: false
+      }],
+      yAxes: [{
+        display: false
+      }]
+    },
+    legend: {
+      display: false
+    }
+  };
+
   const loadingTradesData = [
     {
       id: <Loading />,
@@ -195,6 +219,35 @@ const Post = () => {
     }
   }, [router.query.addr]);
 
+  useEffect(() => {
+    const labels = [], data = [];
+    for (let i = trades.length - 1; i >= 0; i--) {
+      const time = trades[i].timestamp.split(" ")[0];
+      const position = labels.indexOf(time);
+      if (position === -1) {
+        // Time doesn't exist
+        labels.push(time);
+        data.push(1);
+      } else {
+        // Time already exists
+        data[position]++;
+      }
+    }
+
+    const config = {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: "#666",
+        borderColor: "#888",
+        borderWidth: 1
+      }],
+    };
+
+    // @ts-expect-error
+    setGraphData(config);
+  }, [trades]);
+
   return (
     <>
       <Head>
@@ -208,6 +261,8 @@ const Post = () => {
             <Breadcrumbs.Item>{addr}</Breadcrumbs.Item>
           </Breadcrumbs>
         </div>
+
+        <Bar data={graphData} height={50} options={graphOptions} />
 
         {trades.length === 0 ? (
           <Table data={loadingTradesData}>
