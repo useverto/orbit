@@ -52,6 +52,7 @@ const Order = () => {
     type: "warning",
     title: "pending",
   });
+  const [loading, setLoading] = useState(true);
 
   const [orders, setOrders] = useState([]);
 
@@ -81,6 +82,8 @@ const Order = () => {
             }`
           );
         }
+
+        setLoading(false);
 
         if (type === "Buy") {
           const res = await run(
@@ -288,11 +291,13 @@ const Order = () => {
 
         <Spacer y={2} />
 
-        <a target="_blank" href={`https://viewblock.io/arweave/tx/${id}`}>
-          <Card width="50%" style={{ border: "1px dashed #333" }}>
-            <Description title={id} content={`${type} - ${value}`} />
-          </Card>
-        </a>
+        {!loading && (
+          <a target="_blank" href={`https://viewblock.io/arweave/tx/${id}`}>
+            <Card width="50%" style={{ border: "1px dashed #333" }}>
+              <Description title={id} content={`${type} - ${value}`} />
+            </Card>
+          </a>
+        )}
         {orders.map((order) => (
           <>
             <Spacer y={1} />
