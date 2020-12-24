@@ -9,6 +9,8 @@ import {
   Breadcrumbs,
   Table,
   Spacer,
+  Row,
+  Button,
 } from "@geist-ui/react";
 import { all, run } from "ar-gql";
 import moment from "moment";
@@ -19,6 +21,7 @@ const Post = () => {
   const [addr, setAddr] = useState("");
 
   const [trades, setTrades] = useState([]);
+  const [limit, setLimit] = useState(10);
   const [graphData, setGraphData] = useState([]);
   const graphOptions = {
     tooltips: {
@@ -331,11 +334,23 @@ const Post = () => {
             <Table.Column prop="type" label="Order Type" />
           </Table>
         ) : (
-          <Table data={trades}>
-            <Table.Column prop="id" label="Order ID" />
-            <Table.Column prop="timestamp" label="Timestamp" />
-            <Table.Column prop="type" label="Order Type" />
-          </Table>
+          <>
+            <Table data={trades.slice(0, limit)}>
+              <Table.Column prop="id" label="Order ID" />
+              <Table.Column prop="timestamp" label="Timestamp" />
+              <Table.Column prop="type" label="Order Type" />
+            </Table>
+            {limit < trades.length && (
+              <>
+                <Spacer y={2} />
+                <Row justify="center">
+                  <Button onClick={() => setLimit((limit) => limit + 10)}>
+                    Show More
+                  </Button>
+                </Row>
+              </>
+            )}
+          </>
         )}
       </Page>
     </>
