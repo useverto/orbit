@@ -1,11 +1,10 @@
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { useState, useEffect } from "react";
-import { Loading, Text, Dot, Page, Breadcrumbs, Table } from "@geist-ui/react";
+import { Loading, Text, Dot, Page, Breadcrumbs, Table, Spacer } from "@geist-ui/react";
 import { all, run } from "ar-gql";
 import moment from "moment";
-import { Bar } from 'react-chartjs-2';
-import styles from "../styles/Post.module.scss";
+import { Bar } from "react-chartjs-2";
 
 const Post = () => {
   const router = useRouter();
@@ -15,24 +14,30 @@ const Post = () => {
   const [graphData, setGraphData] = useState([]);
   const graphOptions = {
     tooltips: {
-      mode: 'index',
-      intersect: false
+      mode: "index",
+      intersect: false,
     },
     hover: {
-      mode: 'nearest',
-      intersect: true
+      mode: "nearest",
+      intersect: true,
     },
     scales: {
-      xAxes: [{
-        display: false
-      }],
-      yAxes: [{
-        display: false
-      }]
+      xAxes: [
+        {
+          display: false,
+          stacked: true,
+        },
+      ],
+      yAxes: [
+        {
+          display: false,
+          stacked: true,
+        },
+      ],
     },
     legend: {
-      display: false
-    }
+      display: false,
+    },
   };
 
   const loadingTradesData = [
@@ -220,7 +225,11 @@ const Post = () => {
   }, [router.query.addr]);
 
   useEffect(() => {
-    const labels = [], data = [];
+    const labels = [],
+      data = [];
+    const errored = [],
+      pending = [],
+      succeeded = [];
     for (let i = trades.length - 1; i >= 0; i--) {
       const time = trades[i].timestamp.split(" ")[0];
       const position = labels.indexOf(time);
@@ -228,20 +237,61 @@ const Post = () => {
         // Time doesn't exist
         labels.push(time);
         data.push(1);
+        if (trades[i].status === "completed") {
+          succeeded.push(1);
+          pending.push(0);
+          errored.push(0);
+        }
+        if (trades[i].status === "pending") {
+          succeeded.push(0);
+          pending.push(1);
+          errored.push(0);
+        }
+        if (trades[i].status === "cancelled") {
+          succeeded.push(0);
+          pending.push(0);
+          errored.push(1);
+        }
       } else {
         // Time already exists
         data[position]++;
+        if (trades[i].status === "completed") {
+          succeeded[position]++;
+        }
+        if (trades[i].status === "pending") {
+          pending[position]++;
+        }
+        if (trades[i].status === "cancelled") {
+          errored[position]++;
+        }
       }
     }
 
     const config = {
       labels,
-      datasets: [{
-        data,
-        backgroundColor: "#666",
-        borderColor: "#888",
-        borderWidth: 1
-      }],
+      datasets: [
+        {
+          label: "Succeeded",
+          backgroundColor: "rgba(0, 212, 110, 0.5)",
+          borderColor: "#00D46E",
+          borderWidth: 0.5,
+          data: succeeded,
+        },
+        {
+          label: "Pending",
+          backgroundColor: "rgba(255, 211, 54, 0.5)",
+          borderColor: "#FFD336",
+          borderWidth: 0.5,
+          data: pending,
+        },
+        {
+          label: "Errored",
+          backgroundColor: "rgba(255, 55, 93, 0.5)",
+          borderColor: "#FF375D",
+          borderWidth: 0.5,
+          data: errored,
+        },
+      ],
     };
 
     // @ts-expect-error
@@ -255,12 +305,12 @@ const Post = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Page>
-        <div className={styles.heading}>
-          <Breadcrumbs size="large">
-            <Breadcrumbs.Item href="/">🌍rbit</Breadcrumbs.Item>
-            <Breadcrumbs.Item>{addr}</Breadcrumbs.Item>
-          </Breadcrumbs>
-        </div>
+        <Breadcrumbs size="large">
+          <Breadcrumbs.Item href="/">🌍rbit</Breadcrumbs.Item>
+          <Breadcrumbs.Item>{addr}</Breadcrumbs.Item>
+        </Breadcrumbs>
+
+        <Spacer y={1} />
 
         <Bar data={graphData} height={50} options={graphOptions} />
 
@@ -271,12 +321,12 @@ const Post = () => {
             <Table.Column prop="type" label="Order Type" />
           </Table>
         ) : (
-            <Table data={trades}>
-              <Table.Column prop="id" label="Order ID" />
-              <Table.Column prop="timestamp" label="Timestamp" />
-              <Table.Column prop="type" label="Order Type" />
-            </Table>
-          )}
+          <Table data={trades}>
+            <Table.Column prop="id" label="Order ID" />
+            <Table.Column prop="timestamp" label="Timestamp" />
+            <Table.Column prop="type" label="Order Type" />
+          </Table>
+        )}
       </Page>
     </>
   );
