@@ -203,7 +203,7 @@ const Post = () => {
               ...trades,
               {
                 id: (
-                  <Text>
+                  <>
                     <Dot
                       type={
                         status === "pending"
@@ -216,7 +216,7 @@ const Post = () => {
                     <a target="_blank" href={`/order?id=${tx.node.id}`}>
                       {tx.node.id}
                     </a>
-                  </Text>
+                  </>
                 ),
                 hasMined: tx.node.block ? true : false,
                 unix: tx.node.block

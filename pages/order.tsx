@@ -6,6 +6,7 @@ import {
   Page,
   Breadcrumbs,
   Spacer,
+  Note,
   Dot,
   Tag,
   Text,
@@ -20,7 +21,6 @@ const getARAmount = (tx: GQLNodeInterface) => {
 };
 
 const getPSTAmount = async (tx: GQLNodeInterface) => {
-  console.log(tx);
   const contract = tx.tags.find((tag) => tag.name === "Contract");
   const input = tx.tags.find((tag) => tag.name === "Input");
   if (contract && input) {
@@ -56,6 +56,15 @@ const Order = () => {
 
   const [orders, setOrders] = useState([]);
 
+  const bannerData = [
+    {
+      content:
+        "This order was created before tags for AR transfers were added.",
+      timestamp: 1608763440,
+    },
+  ];
+  const [banners, setBanners] = useState([]);
+
   useEffect(() => {
     if (router.query.id) {
       // @ts-ignore
@@ -63,6 +72,7 @@ const Order = () => {
 
       // @ts-ignore
       tx(router.query.id).then(async (tx) => {
+        console.log(tx);
         setOwner(tx.owner.address);
         setPost(tx.recipient);
 
@@ -74,6 +84,11 @@ const Order = () => {
         }
         if (type === "Sell") {
           setValue(await getPSTAmount(tx));
+
+          // if (tx.block && tx.block.timestamp > bannerData[0].timestamp)
+          setBanners((banners) => {
+            return [...banners, bannerData[0].content];
+          });
         }
         if (type === "Swap") {
           setValue(
@@ -271,6 +286,15 @@ const Order = () => {
           <Breadcrumbs.Item>{id}</Breadcrumbs.Item>
         </Breadcrumbs>
 
+        {banners.map((banner) => (
+          <>
+            <Spacer y={1} />
+            <Note label="warning" type="warning">
+              {banner}
+            </Note>
+          </>
+        ))}
+
         <Spacer y={1} />
 
         {/* @ts-expect-error */}
@@ -279,7 +303,9 @@ const Order = () => {
           <Tag type={status.type}>{status.title}</Tag>
         </Dot>
 
-        <Text>
+        <Spacer y={1} />
+
+        <>
           Owner:{" "}
           <a
             target="_blank"
@@ -287,7 +313,7 @@ const Order = () => {
           >
             {owner}
           </a>
-        </Text>
+        </>
 
         <Spacer y={2} />
 
