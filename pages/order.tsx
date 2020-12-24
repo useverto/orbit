@@ -2,13 +2,7 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { tx, run } from "ar-gql";
 import Head from "next/head";
-import {
-  Page,
-  Breadcrumbs,
-  Spacer,
-  Card,
-  Description,
-} from "@geist-ui/react";
+import { Page, Breadcrumbs, Spacer, Card, Description } from "@geist-ui/react";
 import { GQLNodeInterface } from "ar-gql/dist/types";
 import Arweave from "arweave";
 
@@ -179,15 +173,22 @@ const Order = () => {
 
         <Spacer y={1} />
 
-        <Card width="50%">
-          <Description title={id} content={`${type} - ${value}`} />
-        </Card>
+        <a target="_blank" href={`https://viewblock.io/arweave/tx/${id}`}>
+          <Card width="50%">
+            <Description title={id} content={`${type} - ${value}`} />
+          </Card>
+        </a>
         {orders.map((order) => (
           <>
             <Spacer y={1} />
-            <Card width="50%">
-              <Description title={order.title} content={order.description} />
-            </Card>
+            <a
+              target="_blank"
+              href={`https://viewblock.io/arweave/tx/${order.title}`}
+            >
+              <Card width="50%">
+                <Description title={order.title} content={order.description} />
+              </Card>
+            </a>
           </>
         ))}
       </Page>
