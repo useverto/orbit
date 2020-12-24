@@ -1,8 +1,10 @@
 import { useRouter } from "next/router";
+import Head from "next/head";
 import { useState, useEffect } from "react";
 import { Loading, Text, Dot, Page, Breadcrumbs, Table } from "@geist-ui/react";
 import { all, run } from "ar-gql";
 import moment from "moment";
+import styles from "../styles/Post.module.scss";
 
 const Post = () => {
   const router = useRouter();
@@ -194,27 +196,34 @@ const Post = () => {
   }, [router.query.addr]);
 
   return (
-    <Page>
-      <Breadcrumbs size="large">
-        <Breadcrumbs.Item>🌍rbit</Breadcrumbs.Item>
-        <Breadcrumbs.Item href="/">Trading Posts</Breadcrumbs.Item>
-        <Breadcrumbs.Item>{addr}</Breadcrumbs.Item>
-      </Breadcrumbs>
+    <>
+      <Head>
+        <title>Orbit / Post</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <Page>
+        <div className={styles.heading}>
+          <Breadcrumbs size="large">
+            <Breadcrumbs.Item href="/">🌍rbit</Breadcrumbs.Item>
+            <Breadcrumbs.Item>{addr}</Breadcrumbs.Item>
+          </Breadcrumbs>
+        </div>
 
-      {trades.length === 0 ? (
-        <Table data={loadingTradesData}>
-          <Table.Column prop="id" label="Order ID" />
-          <Table.Column prop="timestamp" label="Timestamp" />
-          <Table.Column prop="type" label="Order Type" />
-        </Table>
-      ) : (
-        <Table data={trades}>
-          <Table.Column prop="id" label="Order ID" />
-          <Table.Column prop="timestamp" label="Timestamp" />
-          <Table.Column prop="type" label="Order Type" />
-        </Table>
-      )}
-    </Page>
+        {trades.length === 0 ? (
+          <Table data={loadingTradesData}>
+            <Table.Column prop="id" label="Order ID" />
+            <Table.Column prop="timestamp" label="Timestamp" />
+            <Table.Column prop="type" label="Order Type" />
+          </Table>
+        ) : (
+            <Table data={trades}>
+              <Table.Column prop="id" label="Order ID" />
+              <Table.Column prop="timestamp" label="Timestamp" />
+              <Table.Column prop="type" label="Order Type" />
+            </Table>
+          )}
+      </Page>
+    </>
   );
 };
 

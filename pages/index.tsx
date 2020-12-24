@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Head from "next/head";
 import Verto from "@verto/lib";
 import Arweave from "arweave";
-import { Table, Loading, Dot, Tooltip } from "@geist-ui/react";
+import { Table, Loading, Dot, Tooltip, Page } from "@geist-ui/react";
 
 import { query } from "../utils/gql";
 import styles from "../styles/Index.module.scss";
@@ -145,7 +145,7 @@ export default function Index() {
         <title>Orbit</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className={styles.container}>
+      <Page>
         <div className={styles.heading}>
           <h1 className={styles.title}>🌍rbit</h1>
           <h4>Verto Protocol Explorer</h4>
@@ -165,7 +165,7 @@ export default function Index() {
             <Table.Column prop="stake" label="stake" />
           </Table>
         )}
-      </div>
+      </Page>
     </>
   );
 }
