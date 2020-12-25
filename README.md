@@ -1,9 +1,4 @@
-<p align="center">
-  <a href="https://orbit.verto.exchange">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="10em" font-size="900">🌍</text></svg>
-  </a>
-  <h1 align="center">Orbit</h1>
-</p>
+<h1 align="center">🌍 Orbit</h1>
 
 ## About
 
