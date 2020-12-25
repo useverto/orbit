@@ -15,6 +15,7 @@ import {
 } from "@geist-ui/react";
 import { GQLNodeInterface } from "ar-gql/dist/types";
 import Arweave from "arweave";
+import Verto from "@verto/lib";
 
 const getARAmount = (tx: GQLNodeInterface) => {
   return `${parseFloat(tx.quantity.ar)} AR`;
@@ -87,7 +88,10 @@ const Order = () => {
 
           // if (tx.block && tx.block.timestamp > bannerData[0].timestamp)
           setBanners((banners) => {
-            return [...banners, bannerData[0].content];
+            return [...banners, {
+              type: "warning",
+              content: bannerData[0].content
+            }];
           });
         }
         if (type === "Swap") {
@@ -177,6 +181,86 @@ const Order = () => {
                 },
               ];
             });
+          }
+        }
+        if (type === "Swap") {
+          const hash = tx.tags.find((tag) => tag.name === "Hash")?.value;
+
+          if (hash) {
+            // Going from ETH -> AR
+            // Search for "AR-Transfers"
+            const res = await run(
+              `
+              query($post: String!, $order: [String!]!) {
+                transactions(
+                  owners: [$post]
+                  tags: [
+                    { name: "Exchange", values: "Verto" }
+                    { name: "Type", values: "AR-Transfer" }
+                    { name: "Order", values: $order }
+                  ]
+                ) {
+                  edges {
+                    node {
+                      id
+                      quantity {
+                        ar
+                      }
+                    }
+                  }
+                }
+              }
+              `,
+              { post: tx.recipient, order: hash }
+            );
+  
+            for (const tx of res.data.transactions.edges) {
+              const amnt = await getARAmount(tx.node);
+              setOrders((orders) => {
+                return [
+                  ...orders,
+                  {
+                    title: tx.node.id,
+                    description: `AR Transfer - ${amnt}`,
+                  },
+                ];
+              });
+            }
+
+            if (res.data.transactions.edges.length === 0) {
+              const config = await new Verto().getConfig(tx.recipient);
+              let url = config.publicURL.startsWith("https://")
+                ? config.publicURL
+                : "https://" + config.publicURL;
+              let endpoint = url.endsWith("/") ? "orders" : "/orders";
+
+              const res = await fetch(url + endpoint);
+              const orders = await res.clone().json();
+
+              const table = orders.find((table) => table.token === "TX_STORE").orders;
+              const entry = table.find((elem) => elem.txHash === hash);
+
+              if (entry) {
+                if (entry.parsed === 1) {
+                  setBanners((banners) => {
+                    return [...banners, {
+                      type: "error",
+                      content: "An error occured. Most likely the Ethereum hash submitted is invalid."
+                    }];
+                  });
+                  setStatus({
+                    type: "error",
+                    title: "errored",
+                  });
+                } else {
+                  // We're all good
+                }
+              } else {
+                // This is were it gets tricky ...
+              }
+            }
+          } else {
+            // Going from AR -> ETH
           }
         }
 
@@ -292,8 +376,8 @@ const Order = () => {
         {banners.map((banner) => (
           <>
             <Spacer y={1} />
-            <Note label="warning" type="warning">
-              {banner}
+            <Note label={banner.type} type={banner.type}>
+              {banner.content}
             </Note>
           </>
         ))}
