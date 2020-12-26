@@ -48,6 +48,7 @@ const Order = () => {
   const [owner, setOwner] = useState("");
   const [post, setPost] = useState("");
   const [type, setType] = useState("");
+  const [hash, setHash] = useState("");
   const [value, setValue] = useState("");
   const [status, setStatus] = useState({
     type: "warning",
@@ -80,6 +81,9 @@ const Order = () => {
         const type = tx.tags.find((tag) => tag.name === "Type").value;
         setType(type);
 
+        const hash = tx.tags.find((tag) => tag.name === "Hash")?.value;
+        setHash(hash);
+
         if (type === "Buy") {
           setValue(getARAmount(tx));
         }
@@ -88,10 +92,13 @@ const Order = () => {
 
           // if (tx.block && tx.block.timestamp > bannerData[0].timestamp)
           setBanners((banners) => {
-            return [...banners, {
-              type: "warning",
-              content: bannerData[0].content
-            }];
+            return [
+              ...banners,
+              {
+                type: "warning",
+                content: bannerData[0].content,
+              },
+            ];
           });
         }
         if (type === "Swap") {
@@ -184,8 +191,6 @@ const Order = () => {
           }
         }
         if (type === "Swap") {
-          const hash = tx.tags.find((tag) => tag.name === "Hash")?.value;
-
           if (hash) {
             // Going from ETH -> AR
             // Search for "AR-Transfers"
@@ -213,7 +218,7 @@ const Order = () => {
               `,
               { post: tx.recipient, order: hash }
             );
-  
+
             for (const tx of res.data.transactions.edges) {
               const amnt = await getARAmount(tx.node);
               setOrders((orders) => {
@@ -237,16 +242,21 @@ const Order = () => {
               const res = await fetch(url + endpoint);
               const orders = await res.clone().json();
 
-              const table = orders.find((table) => table.token === "TX_STORE").orders;
+              const table = orders.find((table) => table.token === "TX_STORE")
+                .orders;
               const entry = table.find((elem) => elem.txHash === hash);
 
               if (entry) {
                 if (entry.parsed === 1) {
                   setBanners((banners) => {
-                    return [...banners, {
-                      type: "error",
-                      content: "An error occured. Most likely the Ethereum hash submitted is invalid."
-                    }];
+                    return [
+                      ...banners,
+                      {
+                        type: "error",
+                        content:
+                          "An error occured. Most likely the Ethereum hash submitted is invalid.",
+                      },
+                    ];
                   });
                   setStatus({
                     type: "error",
@@ -405,7 +415,14 @@ const Order = () => {
         <Spacer y={2} />
 
         {!loading && (
-          <a target="_blank" href={`https://viewblock.io/arweave/tx/${id}`}>
+          <a
+            target="_blank"
+            href={
+              hash
+                ? `https://etherscan.io/tx/${hash}`
+                : `https://viewblock.io/arweave/tx/${id}`
+            }
+          >
             <Card width="50%" style={{ border: "1px dashed #333" }}>
               <Description title={id} content={`${type} - ${value}`} />
             </Card>
