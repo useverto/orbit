@@ -312,6 +312,58 @@ const Order = () => {
           });
         }
 
+        const refundRes = await run(
+          `
+            query($post: String!, $order: [String!]!) {
+              transactions(
+                recipients: [$post]
+                tags: [
+                  { name: "Exchange", values: "Verto" }
+                  { name: "Type", values: "Refund" }
+                  { name: "Order", values: $order }
+                ]
+                first: 1
+              ) {
+                edges {
+                  node {
+                    id
+                    quantity {
+                      ar
+                    }
+                    tags {
+                      name
+                      value
+                    }
+                  }
+                }
+              }
+            }
+          `
+        );
+        if (refundRes.data.transactions.edges[0]) {
+          const tx = refundRes.data.transactions.edges[0].node;
+          let amnt;
+          if (type === "Buy") {
+            amnt = await getARAmount(tx);
+          }
+          if (type === "Sell") {
+            amnt = await getPSTAmount(tx);
+          }
+          setOrders((orders) => {
+            return [
+              ...orders,
+              {
+                title: tx.id,
+                description: `Refund - ${amnt}`,
+              },
+            ];
+          });
+          setStatus({
+            type: "secondary",
+            title: "refunded",
+          });
+        }
+
         if (type === "Buy" || type === "Sell") {
           const res = await run(
             `

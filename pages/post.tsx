@@ -194,7 +194,34 @@ const Post = () => {
           ).data.transactions.edges[0];
 
           if (cancelTx) {
-            status = "cancelled";
+            status = "ended";
+          }
+
+          const refundTx = (
+            await run(
+              `
+              query($txID: [String!]!) {
+                transactions(
+                  tags: [
+                    { name: "Exchange", values: "Verto" }
+                    { name: "Type", values: "Refund" }
+                    { name: "Order", values: $txID }
+                  ]
+                ) {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+              }
+            `,
+              { txID: tx.node.id }
+            )
+          ).data.transactions.edges[0];
+
+          if (refundTx) {
+            status = "ended";
           }
 
           setTrades((trades) => {
@@ -239,7 +266,7 @@ const Post = () => {
   useEffect(() => {
     const labels = [],
       data = [];
-    const cancelled = [],
+    const ended = [],
       pending = [],
       succeeded = [];
     for (let i = trades.length - 1; i >= 0; i--) {
@@ -252,17 +279,17 @@ const Post = () => {
         if (trades[i].status === "completed") {
           succeeded.push(1);
           pending.push(0);
-          cancelled.push(0);
+          ended.push(0);
         }
         if (trades[i].status === "pending") {
           succeeded.push(0);
           pending.push(1);
-          cancelled.push(0);
+          ended.push(0);
         }
-        if (trades[i].status === "cancelled") {
+        if (trades[i].status === "ended") {
           succeeded.push(0);
           pending.push(0);
-          cancelled.push(1);
+          ended.push(1);
         }
       } else {
         // Time already exists
@@ -273,8 +300,8 @@ const Post = () => {
         if (trades[i].status === "pending") {
           pending[position]++;
         }
-        if (trades[i].status === "cancelled") {
-          cancelled[position]++;
+        if (trades[i].status === "ended") {
+          ended[position]++;
         }
       }
     }
@@ -297,11 +324,11 @@ const Post = () => {
           data: pending,
         },
         {
-          label: "Cancelled",
+          label: "ended",
           backgroundColor: "rgba(130, 130, 130, 0.5)",
           borderColor: "#828282",
           borderWidth: 0.5,
-          data: cancelled,
+          data: ended,
         },
       ],
     };
