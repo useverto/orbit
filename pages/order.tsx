@@ -316,7 +316,7 @@ const Order = () => {
           `
             query($post: String!, $order: [String!]!) {
               transactions(
-                recipients: [$post]
+                owners: [$post]
                 tags: [
                   { name: "Exchange", values: "Verto" }
                   { name: "Type", values: "Refund" }
@@ -338,8 +338,10 @@ const Order = () => {
                 }
               }
             }
-          `
+          `,
+          { post: tx.recipient, order: router.query.id }
         );
+        console.log(refundRes);
         if (refundRes.data.transactions.edges[0]) {
           const tx = refundRes.data.transactions.edges[0].node;
           let amnt;
