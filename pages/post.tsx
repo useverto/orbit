@@ -324,7 +324,7 @@ const Post = () => {
           data: pending,
         },
         {
-          label: "ended",
+          label: "Ended",
           backgroundColor: "rgba(130, 130, 130, 0.5)",
           borderColor: "#828282",
           borderWidth: 0.5,
