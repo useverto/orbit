@@ -140,12 +140,24 @@ const Order = () => {
 
           for (const tx of res.data.transactions.edges) {
             const amnt = await getPSTAmount(tx.node);
+            const match = tx.node.tags.find((tag) => tag.name === "Match");
             setOrders((orders) => {
               return [
                 ...orders,
                 {
                   title: tx.node.id,
-                  description: `PST Transfer - ${amnt}`,
+                  description: match ? (
+                    <>
+                      PST Transfer - {amnt}
+                      <Spacer y={0.5} />
+                      Match -{" "}
+                      <a target="_blank" href={`/order?id=${match.value}`}>
+                        {match.value}
+                      </a>
+                    </>
+                  ) : (
+                    `PST Transfer - ${amnt}`
+                  ),
                 },
               ];
             });
@@ -169,6 +181,10 @@ const Order = () => {
                     quantity {
                       ar
                     }
+                    tags {
+                      name
+                      value
+                    }
                   }
                 }
               }
@@ -179,12 +195,24 @@ const Order = () => {
 
           for (const tx of res.data.transactions.edges) {
             const amnt = await getARAmount(tx.node);
+            const match = tx.node.tags.find((tag) => tag.name === "Match");
             setOrders((orders) => {
               return [
                 ...orders,
                 {
                   title: tx.node.id,
-                  description: `AR Transfer - ${amnt}`,
+                  description: match ? (
+                    <>
+                      AR Transfer - {amnt}
+                      <Spacer y={0.5} />
+                      Match -{" "}
+                      <a target="_blank" href={`/order?id=${match.value}`}>
+                        {match.value}
+                      </a>
+                    </>
+                  ) : (
+                    `AR Transfer - ${amnt}`
+                  ),
                 },
               ];
             });
