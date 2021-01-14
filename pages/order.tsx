@@ -369,7 +369,6 @@ const Order = () => {
           `,
           { post: tx.recipient, order: router.query.id }
         );
-        console.log(refundRes);
         if (refundRes.data.transactions.edges[0]) {
           const tx = refundRes.data.transactions.edges[0].node;
           let amnt;
@@ -391,6 +390,59 @@ const Order = () => {
           setStatus({
             type: "secondary",
             title: "refunded",
+          });
+        }
+
+        const returnRes = await run(
+          `
+            query($post: String!, $order: [String!]!) {
+              transactions(
+                owners: [$post]
+                tags: [
+                  { name: "Exchange", values: "Verto" }
+                  { name: "Type", values: "${type}-Return" }
+                  { name: "Order", values: $order }
+                ]
+                first: 1
+              ) {
+                edges {
+                  node {
+                    id
+                    quantity {
+                      ar
+                    }
+                    tags {
+                      name
+                      value
+                    }
+                  }
+                }
+              }
+            }
+          `,
+          { post: tx.recipient, order: router.query.id }
+        );
+        if (returnRes.data.transactions.edges[0]) {
+          const tx = returnRes.data.transactions.edges[0].node;
+          let amnt;
+          if (type === "Buy") {
+            amnt = await getARAmount(tx);
+          }
+          if (type === "Sell") {
+            amnt = await getPSTAmount(tx);
+          }
+          setOrders((orders) => {
+            return [
+              ...orders,
+              {
+                title: tx.id,
+                description: `Return - ${amnt}`,
+              },
+            ];
+          });
+          setStatus({
+            type: "secondary",
+            title: "returned",
           });
         }
 

@@ -224,6 +224,33 @@ const Post = () => {
             status = "ended";
           }
 
+          const returnTx = (
+            await run(
+              `
+              query($txID: [String!]!) {
+                transactions(
+                  tags: [
+                    { name: "Exchange", values: "Verto" }
+                    { name: "Type", values: "${type}-Return" }
+                    { name: "Order", values: $txID }
+                  ]
+                ) {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+              }
+            `,
+              { txID: tx.node.id }
+            )
+          ).data.transactions.edges[0];
+
+          if (returnTx) {
+            status = "ended";
+          }
+
           setTrades((trades) => {
             return [
               ...trades,
