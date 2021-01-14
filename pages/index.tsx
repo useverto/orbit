@@ -71,9 +71,13 @@ const ping = async (genesis: string): Promise<number | boolean> => {
     : "https://" + config.publicURL;
   let endpoint = url.endsWith("/") ? "ping" : "/ping";
 
-  const res = await fetch(url + endpoint);
-  // TODO: @t8 Check for response before parsing
-  const uptime = (await res.clone().json()).uptime;
+  let uptime;
+  try {
+    const res = await fetch(url + endpoint);
+    uptime = (await res.clone().json()).uptime;
+  } catch {
+    uptime = false;
+  }
 
   return uptime;
 };
