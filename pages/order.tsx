@@ -102,11 +102,16 @@ const Order = () => {
           });
         }
         if (type === "Swap") {
-          setValue(
-            `${tx.tags.find((tag) => tag.name === "Value").value} ${
-              tx.tags.find((tag) => tag.name === "Chain").value
-            }`
-          );
+          const chain = tx.tags.find((tag) => tag.name === "Chain")?.value;
+          const value = tx.tags.find((tag) => tag.name === "Value")?.value;
+
+          if (chain) {
+            if (value) {
+              setValue(`${value} ${chain}`);
+            } else {
+              setValue(getARAmount(tx));
+            }
+          }
         }
 
         setLoading(false);
