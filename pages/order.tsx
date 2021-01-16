@@ -9,13 +9,13 @@ import {
   Note,
   Dot,
   Tag,
-  Text,
   Card,
   Description,
 } from "@geist-ui/react";
 import { GQLNodeInterface } from "ar-gql/dist/types";
 import Arweave from "arweave";
 import Verto from "@verto/lib";
+import { getContract } from "cacheweave";
 
 const getARAmount = (tx: GQLNodeInterface) => {
   return `${parseFloat(tx.quantity.ar)} AR`;
@@ -90,16 +90,44 @@ const Order = () => {
         if (type === "Sell") {
           setValue(await getPSTAmount(tx));
 
-          // if (tx.block && tx.block.timestamp > bannerData[0].timestamp)
-          setBanners((banners) => {
-            return [
-              ...banners,
-              {
-                type: "warning",
-                content: bannerData[0].content,
-              },
-            ];
-          });
+          const contract = tx.tags.find((tag) => tag.name === "Contract");
+          if (contract) {
+            const client = new Arweave({
+              host: "arweave.net",
+              port: 443,
+              protocol: "https",
+            });
+
+            const state = await getContract(client, contract.value, true);
+
+            // @ts-ignore
+            if (state.validity[tx.id]) {
+              // if (tx.block && tx.block.timestamp > bannerData[0].timestamp)
+              setBanners((banners) => {
+                return [
+                  ...banners,
+                  {
+                    type: "warning",
+                    content: bannerData[0].content,
+                  },
+                ];
+              });
+            } else {
+              setBanners((banners) => {
+                return [
+                  ...banners,
+                  {
+                    type: "error",
+                    content: "Invalid SmartWeave interaction.",
+                  },
+                ];
+              });
+              setStatus({
+                type: "error",
+                title: "invalid",
+              });
+            }
+          }
         }
         if (type === "Swap") {
           const chain = tx.tags.find((tag) => tag.name === "Chain")?.value;

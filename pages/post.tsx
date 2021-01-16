@@ -12,6 +12,8 @@ import {
   Button,
 } from "@geist-ui/react";
 import { all, run } from "ar-gql";
+import Arweave from "arweave";
+import { getContract } from "cacheweave";
 import moment from "moment";
 import { Bar } from "react-chartjs-2";
 
@@ -249,6 +251,26 @@ const Post = () => {
 
           if (returnTx) {
             status = "ended";
+          }
+
+          if (type === "Sell" && status === "pending") {
+            const contract = tx.node.tags.find(
+              (tag) => tag.name === "Contract"
+            );
+            if (contract) {
+              const client = new Arweave({
+                host: "arweave.net",
+                port: 443,
+                protocol: "https",
+              });
+
+              const state = await getContract(client, contract.value, true);
+
+              // @ts-ignore
+              if (!state.validity[tx.node.id]) {
+                status = "ended";
+              }
+            }
           }
 
           setTrades((trades) => {

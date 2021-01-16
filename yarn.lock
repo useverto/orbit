@@ -930,6 +930,16 @@ cacheweave@^2.1.0:
     community-js "^1.1.6"
     smartweave "^0.4.13"
 
+cacheweave@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/cacheweave/-/cacheweave-2.2.0.tgz#bf1d7f3da7a0e597d227f53b8e314e850596d999"
+  integrity sha512-t2dXi8L0B9x+Jyl+YsJgL6gCVvrB9tt7N99ipFT1AZtvwh3GuSzO5LXaxsrZTGG6B4bpWIEXkPNeU+FSAXNYjQ==
+  dependencies:
+    ar-gql "^0.0.3"
+    arweave "^1.10.0"
+    community-js "^1.1.15"
+    smartweave "^0.4.23"
+
 camelcase-keys@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/camelcase-keys/-/camelcase-keys-2.1.0.tgz#308beeaffdf28119051efa1d932213c91b8f92e7"
@@ -1180,6 +1190,16 @@ commondir@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/commondir/-/commondir-1.0.1.tgz#ddd800da0c66127393cca5950ea968a3aaf1253b"
   integrity sha1-3dgA2gxmEnOTzKWVDqloo6rxJTs=
+
+community-js@^1.1.15:
+  version "1.1.15"
+  resolved "https://registry.yarnpkg.com/community-js/-/community-js-1.1.15.tgz#d61ef0d672faf4e29131f1a061c715f03049be9b"
+  integrity sha512-Ynp5lwokeSKUL948pDEtAa2oj9gyUmEi86IU3Bw0mLYHenPZOdPnsLkBJs8iY5hO9YX4Nc4R2Z01q4D9ys1Zrg==
+  dependencies:
+    arweave "^1.9.1"
+    axios "^0.21.0"
+    smartweave "^0.4.23"
+    tiny-worker "^2.3.0"
 
 community-js@^1.1.6:
   version "1.1.8"
@@ -4204,6 +4224,17 @@ smartweave@^0.4.11, smartweave@^0.4.13:
   version "0.4.13"
   resolved "https://registry.yarnpkg.com/smartweave/-/smartweave-0.4.13.tgz#d5da11332199acd7e3548b8d553f68d52b60c0e9"
   integrity sha512-xf+ACoQ37sejfYJvl+G4Glc69P3m5iT29kwRuC7w8rBRSdhyZeHSssJMbYpFzaQtu4AcGy1YUnyPh+1iPQv3hQ==
+  dependencies:
+    "@weavery/clarity" "^0.1.5"
+    arweave "^1.9.1"
+    bignumber.js "^9.0.1"
+    loglevel "^1.7.0"
+    yargs "^16.1.0"
+
+smartweave@^0.4.23:
+  version "0.4.23"
+  resolved "https://registry.yarnpkg.com/smartweave/-/smartweave-0.4.23.tgz#8037102b839f4e324fe2aaa605d02e8a14bd0a50"
+  integrity sha512-vU9iAPKZRnjVaRFmRdvkAKy1e+oWYo4mj/7s36VOumYX7jceBYQPb2cwEILgghaimWpIvdHi1kcfs0zcqcNlHg==
   dependencies:
     "@weavery/clarity" "^0.1.5"
     arweave "^1.9.1"

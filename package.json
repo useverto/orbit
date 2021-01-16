@@ -12,6 +12,7 @@
     "@verto/lib": "^0.8.1",
     "ar-gql": "^0.0.3",
     "arweave": "^1.10.0",
+    "cacheweave": "^2.2.0",
     "chart.js": "^2.9.4",
     "moment": "^2.29.1",
     "next": "10.0.4",
