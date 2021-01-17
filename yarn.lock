@@ -188,16 +188,17 @@
     "@types/prop-types" "*"
     csstype "^3.0.2"
 
-"@verto/lib@^0.8.1":
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/@verto/lib/-/lib-0.8.1.tgz#5b82310c933be8d2155b59408886208a4f4185c9"
-  integrity sha512-SL6aymEJ6fVizXl/sX38ZTP1g5BqlTW/pyuTHNd9cAGRfOYBLWq/6psRjNWldAIAsPW9R+5GhFDvMG7hNTciaA==
+"@verto/lib@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@verto/lib/-/lib-0.9.0.tgz#616601750fa51cc1a2791cf53a00aa2c3321ed62"
+  integrity sha512-3AAFfB+bTJfox1dOJDoukgZbhC4Sy9GSirT/1zcOH8rHlcR6VsARldex6tmjVX8cD3t+M9faQmZlZ4vXOYAVkQ==
   dependencies:
+    ar-gql "^0.0.3"
     arweave "^1.10.0"
-    cacheweave "^2.1.0"
+    cacheweave "^2.5.0"
     moment "^2.29.1"
     node-fetch "^2.6.1"
-    smartweave "^0.4.13"
+    smartweave "^0.4.21"
 
 "@weavery/clarity@^0.1.5":
   version "0.1.5"
@@ -920,20 +921,10 @@ cache-base@^1.0.1:
     union-value "^1.0.0"
     unset-value "^1.0.0"
 
-cacheweave@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/cacheweave/-/cacheweave-2.1.0.tgz#0aa4878ed831fb164e5a834ecd61baa7624888e0"
-  integrity sha512-OWorhqe3vww5zikp+WxNxtRxRJcmVd5+JazkFzrGfVYyI/dfc/MJ0WhGoHjhGwRG4usBCcdXZ0jBUNumlOt8tA==
-  dependencies:
-    ar-gql "^0.0.3"
-    arweave "^1.10.0"
-    community-js "^1.1.6"
-    smartweave "^0.4.13"
-
-cacheweave@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/cacheweave/-/cacheweave-2.2.0.tgz#bf1d7f3da7a0e597d227f53b8e314e850596d999"
-  integrity sha512-t2dXi8L0B9x+Jyl+YsJgL6gCVvrB9tt7N99ipFT1AZtvwh3GuSzO5LXaxsrZTGG6B4bpWIEXkPNeU+FSAXNYjQ==
+cacheweave@^2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/cacheweave/-/cacheweave-2.5.0.tgz#0c49845bf8a148439ba582c2fc45af0982659d29"
+  integrity sha512-4stiUaetJjfSSGvfcypJw5d8PYuffcx0juzZEuC0Xsa9Zq69Qvq6KgAyBwty6Z/tLg2anL3WSPQhjVlQ2pXSnQ==
   dependencies:
     ar-gql "^0.0.3"
     arweave "^1.10.0"
@@ -1199,16 +1190,6 @@ community-js@^1.1.15:
     arweave "^1.9.1"
     axios "^0.21.0"
     smartweave "^0.4.23"
-    tiny-worker "^2.3.0"
-
-community-js@^1.1.6:
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/community-js/-/community-js-1.1.8.tgz#7b81263a9e121b258798f72ee04d9b1f77fa9f97"
-  integrity sha512-ZJE7Z8COFRc/tJ93lUTTW1Z384PBB54p559cB1eI4C9CsqmXArwezmatv3sr/KsRCRNBpJE2l5S2kAkIpem0Tg==
-  dependencies:
-    arweave "^1.9.1"
-    axios "^0.21.0"
-    smartweave "^0.4.11"
     tiny-worker "^2.3.0"
 
 component-emitter@^1.2.1:
@@ -4220,18 +4201,7 @@ simple-swizzle@^0.2.2:
   dependencies:
     is-arrayish "^0.3.1"
 
-smartweave@^0.4.11, smartweave@^0.4.13:
-  version "0.4.13"
-  resolved "https://registry.yarnpkg.com/smartweave/-/smartweave-0.4.13.tgz#d5da11332199acd7e3548b8d553f68d52b60c0e9"
-  integrity sha512-xf+ACoQ37sejfYJvl+G4Glc69P3m5iT29kwRuC7w8rBRSdhyZeHSssJMbYpFzaQtu4AcGy1YUnyPh+1iPQv3hQ==
-  dependencies:
-    "@weavery/clarity" "^0.1.5"
-    arweave "^1.9.1"
-    bignumber.js "^9.0.1"
-    loglevel "^1.7.0"
-    yargs "^16.1.0"
-
-smartweave@^0.4.23:
+smartweave@^0.4.21, smartweave@^0.4.23:
   version "0.4.23"
   resolved "https://registry.yarnpkg.com/smartweave/-/smartweave-0.4.23.tgz#8037102b839f4e324fe2aaa605d02e8a14bd0a50"
   integrity sha512-vU9iAPKZRnjVaRFmRdvkAKy1e+oWYo4mj/7s36VOumYX7jceBYQPb2cwEILgghaimWpIvdHi1kcfs0zcqcNlHg==
