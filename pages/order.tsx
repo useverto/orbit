@@ -99,7 +99,6 @@ const Order = () => {
             });
 
             const state = await getContract(client, contract.value, true);
-            console.log(state);
 
             // @ts-ignore
             if (state.validity[tx.id]) {
