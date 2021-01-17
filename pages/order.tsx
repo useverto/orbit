@@ -99,6 +99,7 @@ const Order = () => {
             });
 
             const state = await getContract(client, contract.value, true);
+            console.log(state);
 
             // @ts-ignore
             if (state.validity[tx.id]) {
@@ -295,9 +296,12 @@ const Order = () => {
 
             if (res.data.transactions.edges.length === 0) {
               const config = await new Verto().getConfig(tx.recipient);
+              // @ts-ignore
               let url = config.publicURL.startsWith("https://")
-                ? config.publicURL
-                : "https://" + config.publicURL;
+                ? // @ts-ignore
+                  config.publicURL
+                : // @ts-ignore
+                  "https://" + config.publicURL;
               let endpoint = url.endsWith("/") ? "orders" : "/orders";
 
               const res = await fetch(url + endpoint);
