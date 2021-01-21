@@ -605,7 +605,7 @@ const Order = () => {
               target="_blank"
               href={`https://viewblock.io/arweave/tx/${order.title}`}
             >
-              <Card width="50%" style={{ border: "1px dashed #333" }}>
+              <Card width="50%" style={{ border: "1px dashed #333" }} hoverable>
                 <Description title={order.title} content={order.description} />
               </Card>
             </a>
