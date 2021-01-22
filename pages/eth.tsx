@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
-import Head from "next/head";
-import Verto from "@verto/lib";
 import Arweave from "arweave";
-import { Table, Loading, Dot, Tooltip, Page } from "@geist-ui/react";
-import styles from "../styles/Index.module.scss";
+import { useState, useEffect } from "react";
 import { all } from "ar-gql";
+import Head from "next/head";
+import { Page, Text } from "@geist-ui/react";
 
 const client = new Arweave({
   host: "arweave.net",
@@ -15,48 +13,48 @@ const client = new Arweave({
 const Eth = () => {
   const [data, setData] = useState([]);
 
-  const getLinkedAddresses = async (): Promise<{
-    arWallet: string,
-    ethWallet: string
-  }[]> => {
+  const getLinkedAddresses = async (): Promise<
+    {
+      arWallet: string;
+      ethWallet: string;
+    }[]
+  > => {
     const linkedAddresses: {
-      arWallet: string,
-      ethWallet: string
+      arWallet: string;
+      ethWallet: string;
     }[] = [];
-    const res = await all(
-      `query($cursor: String) {
-      transactions(
-        tags: [
-          { name: "Application", values: "ArLink" }
-        ]
-        after: $cursor
-      ) {
-        pageInfo {
-          hasNextPage
-        }
-        edges {
-          node {
-            owner {
-              address
-            }
-            tags {
-              name
-              value
+    const res = await all(`
+      query($cursor: String) {
+        transactions(
+          tags: [{ name: "Application", values: "ArLink" }]
+          after: $cursor
+        ) {
+          pageInfo {
+            hasNextPage
+          }
+          edges {
+            cursor
+            node {
+              owner {
+                address
+              }
+              tags {
+                name
+                value
+              }
             }
           }
         }
       }
-    }`
-    );
+    `);
 
-    console.log("Queried");
     for (const tx of res) {
       let updated: boolean = false;
       for (let i = 0; i < linkedAddresses.length; i++) {
         if (linkedAddresses[i].arWallet === tx.node.owner.address) {
           linkedAddresses[i] = {
             arWallet: tx.node.owner.address,
-            ethWallet: tx.node.tags.find(tag => tag.name === "Wallet").value
+            ethWallet: tx.node.tags.find((tag) => tag.name === "Wallet").value,
           };
           updated = true;
         }
@@ -64,13 +62,13 @@ const Eth = () => {
       if (!updated) {
         linkedAddresses.push({
           arWallet: tx.node.owner.address,
-          ethWallet: tx.node.tags.find(tag => tag.name === "Wallet").value
+          ethWallet: tx.node.tags.find((tag) => tag.name === "Wallet").value,
         });
       }
     }
 
     return linkedAddresses;
-  }
+  };
 
   useEffect(() => {
     getLinkedAddresses().then((res) => setData(res));
@@ -84,7 +82,7 @@ const Eth = () => {
         <title>Orbit / ETH</title>
       </Head>
       <Page>
-        {data}
+        <Text>{JSON.stringify(data)}</Text>
       </Page>
     </>
   );
