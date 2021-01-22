@@ -188,10 +188,10 @@
     "@types/prop-types" "*"
     csstype "^3.0.2"
 
-"@verto/lib@^0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@verto/lib/-/lib-0.9.0.tgz#616601750fa51cc1a2791cf53a00aa2c3321ed62"
-  integrity sha512-3AAFfB+bTJfox1dOJDoukgZbhC4Sy9GSirT/1zcOH8rHlcR6VsARldex6tmjVX8cD3t+M9faQmZlZ4vXOYAVkQ==
+"@verto/lib@^0.9.1":
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/@verto/lib/-/lib-0.9.1.tgz#d1a0f379ce68a353dbefdd5decda8c4141b53a8d"
+  integrity sha512-MFbext3G77HnbcU4dzdmQyf2ZDvs6QQDrO1lNgFlgcgwExs0+BzmHMNb1mCzjeHMEJ6Ww54hsZZ6DLsKzGkUrQ==
   dependencies:
     ar-gql "^0.0.3"
     arweave "^1.10.0"
