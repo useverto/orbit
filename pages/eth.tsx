@@ -26,7 +26,10 @@ const Eth = () => {
     const res = await all(`
       query($cursor: String) {
         transactions(
-          tags: [{ name: "Application", values: "ArLink" }]
+          tags: [
+            { name: "Application", values: "ArLink" }
+            { name: "Chain", values: "ETH" }
+          ]
           after: $cursor
         ) {
           pageInfo {
