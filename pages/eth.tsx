@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { all } from "ar-gql";
 import Head from "next/head";
 import { Page, Text } from "@geist-ui/react";
+import { Pie } from "react-chartjs-2";
 
 const client = new Arweave({
   host: "arweave.net",
@@ -12,7 +13,7 @@ const client = new Arweave({
 
 const Eth = () => {
   const [data, setData] = useState([]);
-
+  const [graphData, setGraphData] = useState([]);
   const getLinkedAddresses = async (): Promise<
     {
       arWallet: string;
@@ -73,18 +74,39 @@ const Eth = () => {
     return linkedAddresses;
   };
 
+  const getWeights = async (): Promise<{}> => {
+    return {};
+  };
+
   useEffect(() => {
     getLinkedAddresses().then((res) => setData(res));
     setInterval(async () => {
       setData(await getLinkedAddresses());
     }, 60000);
   }, []);
+
+  useEffect(() => {
+    console.log("Triggered");
+    let newGraphData = {
+      datasets: [
+        {
+          label: 'Linked Address Weights',
+          data: [],
+        },
+      ],
+    };
+    for (let i = 0; i < data.length; i++) {
+      newGraphData.datasets[0].data.push(data[i].arWallet);
+    }
+    setGraphData(newGraphData);
+  }, [data]);
   return (
     <>
       <Head>
         <title>Orbit / ETH</title>
       </Head>
       <Page>
+        <Pie data={graphData} />
         <Text>{JSON.stringify(data)}</Text>
       </Page>
     </>
