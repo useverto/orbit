@@ -1,5 +1,6 @@
 import Arweave from "arweave";
 import Verto from "@verto/lib";
+import { getContract } from "cacheweave";
 import { useState, useEffect } from "react";
 import { all } from "ar-gql";
 import Head from "next/head";
@@ -28,7 +29,7 @@ const Eth = () => {
       data: []
     }]
   });
-  let userMetaData = {};
+  let userMetaData = [];
   const getLinkedAddresses = async (): Promise<
     {
       arWallet: string;
@@ -94,9 +95,11 @@ const Eth = () => {
     for (const user of data) {
       console.log("Pulling a new user");
       const stake = await verto.getPostStake(user.arWallet);
-      graphData.labels.push(user.arWallet);
-      graphData.datasets[0].data.push(stake);
-      setGraphData(graphData);
+      if (stake > 0) {
+        graphData.labels.push(user.arWallet);
+        graphData.datasets[0].data.push(stake);
+        setGraphData(graphData);
+      }
     }
     console.log("Finished");
   };
@@ -105,7 +108,7 @@ const Eth = () => {
     getLinkedAddresses().then((res) => setData(res));
     setInterval(async () => {
       setData(await getLinkedAddresses());
-    }, 60000);
+    }, 360000);
   }, []);
 
   useEffect(() => {
@@ -118,6 +121,7 @@ const Eth = () => {
         },
       ],
     });
+    userMetaData = [];
     getWeights();
   }, [data]);
 
