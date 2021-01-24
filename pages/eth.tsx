@@ -1,19 +1,34 @@
 import Arweave from "arweave";
+import Verto from "@verto/lib";
 import { useState, useEffect } from "react";
 import { all } from "ar-gql";
 import Head from "next/head";
-import { Page, Text } from "@geist-ui/react";
+import { Page } from "@geist-ui/react";
 import { Pie } from "react-chartjs-2";
 
-const client = new Arweave({
+const client = Arweave.init({
   host: "arweave.net",
   port: 443,
   protocol: "https",
 });
 
+const verto = new Verto(null, client);
+
 const Eth = () => {
   const [data, setData] = useState([]);
-  const [graphData, setGraphData] = useState([]);
+  const graphOptions = {
+    legend: {
+      display: false,
+    }
+  };
+  const [newGraphData, setGraphData] = useState({
+    labels: [],
+    datasets: [{
+      label: "Address Weights",
+      data: []
+    }]
+  });
+  let userMetaData = {};
   const getLinkedAddresses = async (): Promise<
     {
       arWallet: string;
@@ -74,8 +89,16 @@ const Eth = () => {
     return linkedAddresses;
   };
 
-  const getWeights = async (): Promise<{}> => {
-    return {};
+  const getWeights = async () => {
+    let graphData = newGraphData;
+    for (const user of data) {
+      console.log("Pulling a new user");
+      const stake = await verto.getPostStake(user.arWallet);
+      graphData.labels.push(user.arWallet);
+      graphData.datasets[0].data.push(stake);
+      setGraphData(graphData);
+    }
+    console.log("Finished");
   };
 
   useEffect(() => {
@@ -86,28 +109,25 @@ const Eth = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Triggered");
-    let newGraphData = {
+    setGraphData({
+      labels: [],
       datasets: [
         {
-          label: 'Linked Address Weights',
+          label: "Address Weights",
           data: [],
         },
       ],
-    };
-    for (let i = 0; i < data.length; i++) {
-      newGraphData.datasets[0].data.push(data[i].arWallet);
-    }
-    setGraphData(newGraphData);
+    });
+    getWeights();
   }, [data]);
+
   return (
     <>
       <Head>
         <title>Orbit / ETH</title>
       </Head>
       <Page>
-        <Pie data={graphData} />
-        <Text>{JSON.stringify(data)}</Text>
+        <Pie data={newGraphData} options={graphOptions} />
       </Page>
     </>
   );
