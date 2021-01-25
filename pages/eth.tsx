@@ -7,6 +7,8 @@ import Head from "next/head";
 import { Page } from "@geist-ui/react";
 import { Pie } from "react-chartjs-2";
 
+const contract = "usjm4PCxUd5mtaon7zc97-dt-3qf67yPyqgzLnLqk5A";
+
 const client = Arweave.init({
   host: "arweave.net",
   port: 443,
@@ -29,13 +31,13 @@ const Eth = () => {
       data: []
     }]
   });
-  let userMetaData = [];
   const getLinkedAddresses = async (): Promise<
     {
       arWallet: string;
       ethWallet: string;
     }[]
-  > => {
+    > => {
+    setData([]);
     const linkedAddresses: {
       arWallet: string;
       ethWallet: string;
@@ -91,17 +93,31 @@ const Eth = () => {
   };
 
   const getWeights = async () => {
+    console.log("Getting weights");
     let graphData = newGraphData;
+    const contractState = await getContract(client, contract);
     for (const user of data) {
-      console.log("Pulling a new user");
+      console.log(user);
+      let updated = false;
+      let amountOfVRT = 0;
       const stake = await verto.getPostStake(user.arWallet);
       if (stake > 0) {
+        amountOfVRT += stake;
+        updated = true;
+      }
+      // @ts-expect-error
+      const unlockedBalance = contractState.balances[user.arWallet];
+      if (unlockedBalance > 0) {
+        amountOfVRT += unlockedBalance;
+        updated = true;
+      }
+      if (updated) {
+        console.log(user, amountOfVRT);
         graphData.labels.push(user.arWallet);
-        graphData.datasets[0].data.push(stake);
+        graphData.datasets[0].data.push(amountOfVRT);
         setGraphData(graphData);
       }
     }
-    console.log("Finished");
   };
 
   useEffect(() => {
@@ -121,7 +137,6 @@ const Eth = () => {
         },
       ],
     });
-    userMetaData = [];
     getWeights();
   }, [data]);
 
