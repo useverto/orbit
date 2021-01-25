@@ -19,25 +19,29 @@ const verto = new Verto(null, client);
 
 const Eth = () => {
   const [data, setData] = useState([]);
+
   const graphOptions = {
     legend: {
       display: false,
-    }
+    },
   };
-  const [newGraphData, setGraphData] = useState({
+  const emptyGraphData = {
     labels: [],
-    datasets: [{
-      label: "Address Weights",
-      data: []
-    }]
-  });
+    datasets: [
+      {
+        label: "Address Weights",
+        data: [],
+      },
+    ],
+  };
+  const [graphData, setGraphData] = useState(emptyGraphData);
+
   const getLinkedAddresses = async (): Promise<
     {
       arWallet: string;
       ethWallet: string;
     }[]
-    > => {
-    setData([]);
+  > => {
     const linkedAddresses: {
       arWallet: string;
       ethWallet: string;
@@ -71,17 +75,11 @@ const Eth = () => {
     `);
 
     for (const tx of res) {
-      let updated: boolean = false;
-      for (let i = 0; i < linkedAddresses.length; i++) {
-        if (linkedAddresses[i].arWallet === tx.node.owner.address) {
-          linkedAddresses[i] = {
-            arWallet: tx.node.owner.address,
-            ethWallet: tx.node.tags.find((tag) => tag.name === "Wallet").value,
-          };
-          updated = true;
-        }
-      }
-      if (!updated) {
+      const index = linkedAddresses.findIndex(
+        (element) => element.arWallet === tx.node.owner.address
+      );
+      if (index === -1) {
+        // Address was not found
         linkedAddresses.push({
           arWallet: tx.node.owner.address,
           ethWallet: tx.node.tags.find((tag) => tag.name === "Wallet").value,
@@ -93,29 +91,33 @@ const Eth = () => {
   };
 
   const getWeights = async () => {
-    console.log("Getting weights");
-    let graphData = newGraphData;
+    setGraphData(emptyGraphData);
+
     const contractState = await getContract(client, contract);
+
     for (const user of data) {
-      console.log(user);
-      let updated = false;
       let amountOfVRT = 0;
+
       const stake = await verto.getPostStake(user.arWallet);
-      if (stake > 0) {
-        amountOfVRT += stake;
-        updated = true;
-      }
+      amountOfVRT += stake;
+
       // @ts-expect-error
       const unlockedBalance = contractState.balances[user.arWallet];
-      if (unlockedBalance > 0) {
-        amountOfVRT += unlockedBalance;
-        updated = true;
-      }
-      if (updated) {
-        console.log(user, amountOfVRT);
-        graphData.labels.push(user.arWallet);
-        graphData.datasets[0].data.push(amountOfVRT);
-        setGraphData(graphData);
+      amountOfVRT += unlockedBalance;
+
+      if (amountOfVRT > 0) {
+        setGraphData((state) => {
+          return {
+            ...state,
+            labels: [...state.labels, user.arWallet],
+            datasets: [
+              {
+                ...state.datasets[0],
+                data: [...state.datasets[0].data, amountOfVRT],
+              },
+            ],
+          };
+        });
       }
     }
   };
@@ -128,15 +130,6 @@ const Eth = () => {
   }, []);
 
   useEffect(() => {
-    setGraphData({
-      labels: [],
-      datasets: [
-        {
-          label: "Address Weights",
-          data: [],
-        },
-      ],
-    });
     getWeights();
   }, [data]);
 
@@ -146,7 +139,7 @@ const Eth = () => {
         <title>Orbit / ETH</title>
       </Head>
       <Page>
-        <Pie data={newGraphData} options={graphOptions} />
+        <Pie data={graphData} options={graphOptions} />
       </Page>
     </>
   );
