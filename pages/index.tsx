@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Head from "next/head";
 import Verto from "@verto/lib";
 import Arweave from "arweave";
-import { Table, Loading, Dot, Tooltip, Page } from "@geist-ui/react";
+import { Table, Loading, Dot, Tooltip, Page, Card, Link } from "@geist-ui/react";
 import styles from "../styles/Index.module.scss";
 import { all } from "ar-gql";
 
@@ -172,7 +172,8 @@ const Home = () => {
             <Table.Column prop="balance" label="balance" />
             <Table.Column prop="stake" label="stake" />
           </Table>
-        )}
+          )}
+        <Card style={{ marginTop: "45px" }}><Link href="/eth">Ethereum Bridge Statistics ➡️</Link></Card>
       </Page>
     </>
   );
