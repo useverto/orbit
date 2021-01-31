@@ -4,8 +4,9 @@ import { getContract } from "cacheweave";
 import { useState, useEffect } from "react";
 import { all } from "ar-gql";
 import Head from "next/head";
-import { Page } from "@geist-ui/react";
+import { Grid, Page, Text, Tooltip, Link, Collapse, Card } from "@geist-ui/react";
 import { Pie } from "react-chartjs-2";
+import styles from "../styles/Index.module.scss";
 
 const contract = "usjm4PCxUd5mtaon7zc97-dt-3qf67yPyqgzLnLqk5A";
 
@@ -34,7 +35,9 @@ const Eth = () => {
       },
     ],
   };
+  const emptyListData = <Text>Loading...</Text>;
   const [graphData, setGraphData] = useState(emptyGraphData);
+  const [listData, setListData] = useState([emptyListData]);
 
   const getLinkedAddresses = async (): Promise<
     {
@@ -133,13 +136,42 @@ const Eth = () => {
     getWeights();
   }, [data]);
 
+  useEffect(() => {
+    const listItems = data.map((user) =>
+      <Tooltip text={user.ethWallet} placement="topStart" key={user.arWallet}>
+        <li style={{listStyleType: "none"}}>
+          <Link color={true} href={`https://viewblock.io/arweave/address/${user.arWallet}`}>{user.arWallet}</Link>
+        </li>
+      </Tooltip>
+    );
+    setListData(listItems);
+  }, [data]);
+
   return (
     <>
       <Head>
         <title>Orbit / ETH</title>
       </Head>
       <Page>
-        <Pie data={graphData} options={graphOptions} />
+        <div className={styles.heading}>
+          <Text h2>ETH 🌉  Stats</Text>
+        </div>
+        <Grid.Container>
+          <Grid xs={24} sm={24} md={12} lg={12}>
+            <Collapse.Group>
+              <Collapse title="Linked Users">
+                <ul>
+                  {listData}
+                </ul>
+              </Collapse>
+            </Collapse.Group>
+          </Grid>
+          <Grid xs={24} sm={24} md={12} lg={12}>
+            <Card>
+              <Pie data={graphData} options={graphOptions} />
+            </Card>
+          </Grid>
+        </Grid.Container>
       </Page>
     </>
   );
