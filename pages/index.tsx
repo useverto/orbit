@@ -149,6 +149,7 @@ const Home = () => {
           <h1 className={styles.title}>🌍rbit</h1>
           <h4>Verto Protocol Explorer</h4>
         </div>
+        <Card style={{ marginBottom: "45px" }}><Link href="/eth">Ethereum Bridge Statistics ➡️</Link></Card>
         {data.length === 0 ? (
           <Table
             data={[
@@ -173,7 +174,6 @@ const Home = () => {
             <Table.Column prop="stake" label="stake" />
           </Table>
           )}
-        <Card style={{ marginTop: "45px" }}><Link href="/eth">Ethereum Bridge Statistics ➡️</Link></Card>
       </Page>
     </>
   );
