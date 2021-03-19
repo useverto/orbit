@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import ArDB from 'ardb';
 import Arweave from 'arweave'
 import {GQLEdgeTransactionInterface, GQLTransactionInterface} from "ardb/lib/faces/gql";
-import {Card, Grid, Table} from "@geist-ui/react";
+import {Card, Col, Grid, Row, Spacer, Table} from "@geist-ui/react";
 
 const config = {
   host: 'arweave.net',// Hostname or IP address for a Arweave host
@@ -127,34 +127,37 @@ const Analytics = () => {
 
   return (
     <>
-      Hello World!
-      <Grid.Container>
-        <Grid>
-          <Card>
+      <h1 style={{textAlign: "center"}}>Verto Analytics</h1>
+      <Spacer y={2.5}/>
+      <Row gap={2}>
+        <Col>
+          <Card style={{textAlign: "center"}}>
             <h4>Unique Users</h4>
             <Card.Content>
               <h3>{uniqueUsers}</h3>
             </Card.Content>
           </Card>
-        </Grid>
-        <Grid>
-          <Card>
+        </Col>
+        <Col>
+          <Card style={{textAlign: "center"}}>
             <h4>Trades</h4>
             <Card.Content>
               <h3>{totalTrades}</h3>
             </Card.Content>
           </Card>
-        </Grid>
-        <Grid>
-          <Card>
+        </Col>
+        <Col>
+          <Card style={{textAlign: "center"}}>
             <h4>Volume</h4>
             <Card.Content>
               <h3>{volume} AR</h3>
             </Card.Content>
           </Card>
-        </Grid>
-
-        <Grid>
+        </Col>
+      </Row>
+      <Spacer y={2}/>
+      <Row gap={2}>
+        <Col>
           <Card>
             <h4>VRT holder received:</h4>
             <Card.Content>
@@ -165,8 +168,8 @@ const Analytics = () => {
               </Table>
             </Card.Content>
           </Card>
-        </Grid>
-      </Grid.Container>
+        </Col>
+      </Row>
     </>
   )
 }
