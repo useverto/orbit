@@ -1,7 +1,7 @@
 import {useEffect} from "react";
 import ArDB from 'ardb';
 import Arweave from 'arweave'
-import {GQLTransactionInterface} from "ardb/lib/faces/gql";
+import {GQLEdgeTransactionInterface, GQLTransactionInterface} from "ardb/lib/faces/gql";
 
 const config = {
   host: 'arweave.net',// Hostname or IP address for a Arweave host
@@ -32,6 +32,47 @@ const getTradeCount = async (): Promise<number> => {
   return transactions.length
 }
 
+const getTokenholderTips = async (): Promise<{ [id: string]: number }> => {
+
+  const transactions: any = await ardb.search('transactions').tag('Exchange', 'Verto').tag('Type', 'Fee-VRT-Holder').findAll();
+  const tips = {}
+
+  transactions.map((transaction: GQLEdgeTransactionInterface) => {
+    let amount, contract;
+
+    for (const tag of transaction.node.tags) {
+
+      if (tag.name == "Input") {
+        const data = JSON.parse(tag.value)
+        amount = parseInt(data.qty)
+      }
+      if (tag.name == "Contract") {
+        contract = tag.value
+      }
+    }
+
+    if (contract in tips) {
+      tips[contract] += amount
+    } else {
+      tips[contract] = amount
+    }
+  })
+
+  return tips
+}
+
+const getVolume = async (): Promise<number> => {
+
+  const transactions: any = await ardb.search('transactions').tag('Exchange', 'Verto').tag('Type', 'Buy').findAll();
+  let volume = 0
+
+  transactions.map((transaction: GQLEdgeTransactionInterface) => {
+    volume += parseFloat(transaction.node.quantity.ar)
+  })
+
+  return volume
+}
+
 const Analytics = () => {
   // unique user count
   useEffect(() => {
@@ -40,6 +81,12 @@ const Analytics = () => {
     })
     getTradeCount().then((count) => {
       console.log("Trades", count)
+    })
+    getTokenholderTips().then((tips) => {
+      console.log("VRT holder tips", tips)
+    })
+    getVolume().then((volume) => {
+      console.log("AR Volume", volume)
     })
   }, [])
 
