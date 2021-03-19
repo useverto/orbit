@@ -12,7 +12,9 @@ const config = {
   logging: false,     // Enable network request logging
 }
 
-const ardb = new ArDB(new Arweave(config));
+const arweave = new Arweave(config);
+
+const ardb = new ArDB(arweave);
 
 const getUniqueUsers = async (): Promise<number> => {
 
@@ -33,7 +35,7 @@ const getTradeCount = async (): Promise<number> => {
   return transactions.length
 }
 
-const getTokenholderTips = async (): Promise<{ ticker: string, amount: number }[]> => {
+const getTokenholderTips = async (): Promise<{ ticker: string, name: string, amount: number }[]> => {
 
   const transactions: any = await ardb.search('transactions').tag('Exchange', 'Verto').tag('Type', 'Fee-VRT-Holder').findAll();
   const tips = {}
@@ -62,7 +64,12 @@ const getTokenholderTips = async (): Promise<{ ticker: string, amount: number }[
 
   let result = []
   for (const contract in tips) {
-    result.push({ticker: contract, amount: tips[contract]})
+    const data = await arweave.transactions.getData(contract, {decode: true, string: true})
+    console.log(data)
+    const ticker = JSON.parse(data.toString()).ticker
+    const name = JSON.parse(data.toString()).name
+
+    result.push({ticker, name, amount: tips[contract]})
   }
 
   result = result.sort((a, b) => b.amount - a.amount)
@@ -152,6 +159,7 @@ const Analytics = () => {
             <h4>VRT holder received:</h4>
             <Card.Content>
               <Table data={tips}>
+                <Table.Column prop="name" label="Name"/>
                 <Table.Column prop="ticker" label="Ticker"/>
                 <Table.Column prop="amount" label="Amount"/>
               </Table>
