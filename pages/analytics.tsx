@@ -19,19 +19,28 @@ const getUniqueUsers = async (): Promise<number> => {
 
   const users = new Set()
   transactions.map((transaction: GQLTransactionInterface) => {
-    users.add(transaction.owner.address)
+    users.add(transaction.owner) // todo add address
   })
 
   return users.size
+}
+
+const getTradeCount = async (): Promise<number> => {
+
+  const transactions: any = await ardb.search('transactions').tag('Exchange', 'Verto').tag('Type', ['Buy', 'Sell', 'Swap']).findAll();
+
+  return transactions.length
 }
 
 const Analytics = () => {
   // unique user count
   useEffect(() => {
     getUniqueUsers().then((count) => {
-      console.log(count)
+      console.log("Unique Users", count)
     })
-
+    getTradeCount().then((count) => {
+      console.log("Trades", count)
+    })
   }, [])
 
   return (
