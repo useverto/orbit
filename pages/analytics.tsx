@@ -11,6 +11,7 @@ import {
   Col,
   Grid,
   Input,
+  Loading,
   Row,
   Spacer,
   Table,
@@ -139,6 +140,7 @@ const Analytics = () => {
   const [totalTrades, setTotalTrades] = useState(0);
   const [volume, setVolume] = useState(0);
   const [tips, setTips] = useState([]);
+  const [tipsLoading, setTipsLoading] = useState(false);
 
   const { bindings: addressInputBindings, state: address } = useInput("");
 
@@ -153,12 +155,14 @@ const Analytics = () => {
     getVolume().then((volume) => {
       setVolume(parseFloat(volume.toFixed(4)));
     });
-    refetchTips()
+    refetchTips();
   }, []);
 
   const refetchTips = async () => {
+    setTipsLoading(true);
     const tips = await getTokenholderTips(address);
     setTips(tips);
+    setTipsLoading(false);
   };
 
   return (
@@ -205,11 +209,15 @@ const Analytics = () => {
               Refetch
             </Button>
             <Card.Content>
-              <Table data={tips}>
-                <Table.Column prop="name" label="Name" />
-                <Table.Column prop="ticker" label="Ticker" />
-                <Table.Column prop="amount" label="Amount" />
-              </Table>
+              {tipsLoading ? (
+                <Loading />
+              ) : (
+                <Table data={tips}>
+                  <Table.Column prop="name" label="Name" />
+                  <Table.Column prop="ticker" label="Ticker" />
+                  <Table.Column prop="amount" label="Amount" />
+                </Table>
+              )}
             </Card.Content>
           </Card>
         </Col>
