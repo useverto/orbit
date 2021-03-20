@@ -111,6 +111,7 @@ const getVolume = async (): Promise<number> => {
     .tag("Exchange", "Verto")
     .tag("Type", "Buy")
     .findAll();
+
   let volume = 0;
 
   transactions.map((transaction: GQLEdgeTransactionInterface) => {
@@ -126,17 +127,28 @@ const getRetention = async (): Promise<number> => {
     .tag("Exchange", "Verto")
     .tag("Type", "Buy")
     .findAll();
-  let volume = 0;
+
+  const data = {};
 
   transactions.map((transaction: GQLEdgeTransactionInterface) => {
-    volume += parseFloat(transaction.node.quantity.ar);
+    const owner = transaction.node.owner.address;
+    if (owner in data) {
+      data[owner] += 1;
+    } else {
+      data[owner] = 1;
+    }
   });
 
-  return volume;
+  let moreThanOne = 0;
+  for (const [address, count] of Object.entries(data)) {
+    if (count > 1) moreThanOne++;
+  }
+  return moreThanOne;
 };
 
 const Analytics = () => {
   const [uniqueUsers, setUniqueUsers] = useState(0);
+  const [retention, setRetention] = useState(0);
   const [totalTrades, setTotalTrades] = useState(0);
   const [volume, setVolume] = useState(0);
   const [tips, setTips] = useState([]);
@@ -148,6 +160,9 @@ const Analytics = () => {
   useEffect(() => {
     getUniqueUsers().then((count) => {
       setUniqueUsers(count);
+    });
+    getRetention().then((count) => {
+      setRetention(count);
     });
     getTradeCount().then((count) => {
       setTotalTrades(count);
@@ -175,6 +190,14 @@ const Analytics = () => {
             <h4>Unique Users</h4>
             <Card.Content>
               <h3>{uniqueUsers}</h3>
+            </Card.Content>
+          </Card>
+        </Col>
+        <Col>
+          <Card style={{ textAlign: "center" }}>
+            <h4>User retention</h4>
+            <Card.Content>
+              <h3>{retention}</h3>
             </Card.Content>
           </Card>
         </Col>
