@@ -21,8 +21,8 @@ const getUniqueUsers = async (): Promise<number> => {
   const transactions: any = await ardb.search('transactions').tag('Exchange', 'Verto').tag('Type', ['Buy', 'Sell', 'Swap']).findAll();
 
   const users = new Set()
-  transactions.map((transaction: GQLTransactionInterface) => {
-    users.add(transaction.owner) // todo add address
+  transactions.map((transaction: GQLEdgeTransactionInterface) => {
+    users.add(transaction.node.owner.address)
   })
 
   return users.size
